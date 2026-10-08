@@ -7,7 +7,7 @@ export const filterOptions = localStore("filter-options", {
 	selectedDate: ''
 });
 
-export const mediaHistory = localStore("jfr2025-media-history", []);
+export const mediaHistory = localStore("jfr2026-media-history", []);
 
 export const prefs = localStore("prefs", {
 	autoplay: false,
