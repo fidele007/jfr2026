@@ -4,8 +4,8 @@
   let showMediaHistory: boolean = false;
 </script>
 
-<button type="button" title="Historique des médias" on:click={() => (showMediaHistory = true)}>
-  <svg width="32px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+<button type="button" class="btn" title="Historique des vidéos regardées" on:click={() => (showMediaHistory = true)}>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
     ><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
       <path d="M12 8V12L14.5 14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
       <path
@@ -14,36 +14,7 @@
       ></path>
     </g></svg
   >
-  <span>Historique</span>
+  <span class="btn-label">Historique</span>
 </button>
 
 <MediaHistoryModal bind:showModal={showMediaHistory}></MediaHistoryModal>
-
-<style>
-  button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    max-height: 38px;
-    padding: 10px 10px 10px 2px;
-    border-radius: 6px;
-    outline: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    background-color: #1b1b1b;
-    border: 1px solid #858585;
-  }
-
-  button:hover {
-    background-color: #11d7f2;
-    color: #1c274c;
-  }
-
-  @media (prefers-color-scheme: light) {
-    button {
-      background-color: #fff;
-      border: none;
-    }
-  }
-</style>

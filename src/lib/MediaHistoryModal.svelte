@@ -41,6 +41,7 @@
 					type="button"
 					class="btn-danger"
 					title="Effacer l'historique"
+					aria-label="Effacer l'historique"
 					on:click={() => onClearHistory()}
 				>
 					<svg
@@ -93,7 +94,7 @@
 					>
 				</button>
 			</div>
-			<button type="button" title="Fermer" on:click={() => dialog.close()}>
+			<button type="button" title="Fermer" aria-label="Fermer" on:click={() => dialog.close()}>
 				<svg
 					width="24px"
 					height="24px"
@@ -140,18 +141,19 @@
 
 <style>
 	dialog {
-		min-width: 20em;
-		max-width: 50%;
+		width: min(640px, calc(100vw - 32px));
+		max-width: none;
 		min-height: 40%;
-		/* height: 70%; */
-		/* height: fit-content; */
-		max-height: 90%;
-		border-radius: 0.2em;
-		border: none;
+		max-height: 85vh;
+		border-radius: var(--radius);
+		border: 1px solid var(--border);
 		padding: 0;
+		background-color: var(--surface);
+		color: var(--text);
+		box-shadow: 0 20px 50px rgb(0 0 0 / 40%);
 	}
 	dialog::backdrop {
-		background: rgba(0, 0, 0, 0.3);
+		background: rgb(0 0 0 / 50%);
 	}
 	dialog > div {
 		padding: 1em;
@@ -181,6 +183,7 @@
 	#dialog-container {
 		display: flex;
 		flex-direction: column;
+		max-height: 85vh;
 	}
 	#dialog-header {
 		display: flex;
@@ -194,21 +197,32 @@
 	.dialog-title {
 		display: flex;
 	}
+	.dialog-title {
+		align-items: center;
+		gap: 4px;
+	}
 	#dialog-header button {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		max-height: 38px;
-		outline: none;
+		width: 40px;
+		height: 40px;
 		border: none;
+		border-radius: 50%;
 		cursor: pointer;
 		background-color: transparent;
 	}
+	#dialog-header button:hover {
+		background-color: var(--surface-hover);
+	}
 	.btn-danger {
-		color: #dc3545;
+		color: var(--danger);
 	}
 	hr {
 		width: 100%;
+		border: none;
+		border-top: 1px solid var(--border);
+		margin: 8px 0;
 	}
 	#dialog-body {
 		flex: 0 1 auto;
@@ -225,16 +239,21 @@
 		margin-top: 20px;
 		margin-bottom: 20px;
 		text-align: center;
-	}
-	@media (prefers-color-scheme: dark) {
-		dialog {
-			background-color: #363062;
-		}
+		color: var(--text-muted);
 	}
 
-	@media (max-width: 1000px) {
+	/* Bottom sheet on phones */
+	@media (max-width: 600px) {
 		dialog {
-			max-width: 95%;
+			width: 100vw;
+			max-height: 85vh;
+			margin: auto 0 0;
+			border-radius: var(--radius) var(--radius) 0 0;
+			border-bottom: none;
+			padding-bottom: env(safe-area-inset-bottom);
+		}
+		dialog > div {
+			padding: 12px;
 		}
 	}
 </style>

@@ -1,49 +1,50 @@
 <script lang="ts">
 	export let checked = false;
-	export const color = '#646cff';
+	export const color = 'var(--accent)';
 </script>
 
-<div class="switch-container">
-	<label class="switch" style="--switch-color: {color};">
-		<input type="checkbox" bind:checked />
+<label class="switch-container" title="Enchaîner automatiquement la vidéo suivante">
+	<span class="switch" style="--switch-color: {color};">
+		<input type="checkbox" role="switch" bind:checked />
 		<span class="slider"></span>
-	</label>
-	<span>Autoplay</span>
-</div>
+	</span>
+	<span>Lecture auto</span>
+</label>
 
 <style>
 	.switch-container {
 		display: flex;
-		gap: 5px;
+		gap: 8px;
 		align-items: center;
-		font-weight: 700;
-		font-size: 14px;
+		font-weight: 600;
+		font-size: 0.85rem;
+		cursor: pointer;
+		user-select: none;
 	}
 
 	.switch {
 		position: relative;
 		display: inline-block;
-		width: 45px;
-		height: 24px;
+		width: 40px;
+		height: 22px;
 	}
 
 	.switch input {
+		position: absolute;
 		opacity: 0;
-		width: 0;
-		height: 0;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		cursor: pointer;
 	}
 
 	.slider {
 		position: absolute;
-		cursor: pointer;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: #ccc;
-		-webkit-transition: 0.4s;
-		transition: 0.4s;
+		inset: 0;
+		background-color: var(--border);
+		transition: 0.2s;
 		border-radius: 34px;
+		pointer-events: none;
 	}
 
 	.slider:before {
@@ -51,27 +52,23 @@
 		content: '';
 		height: 16px;
 		width: 16px;
-		left: 4px;
-		bottom: 4px;
+		left: 3px;
+		bottom: 3px;
 		background-color: white;
-		-webkit-transition: 0.4s;
-		transition: 0.4s;
+		transition: 0.2s;
 		border-radius: 50%;
 	}
 
 	input:checked + .slider {
-		/* background-color: #2196f3; */
 		background-color: var(--switch-color);
 	}
 
-	input:checked + .slider {
-		/* box-shadow: 0 0 1px #2196f3; */
-		box-shadow: 0 0 1px var(--switch-color);
+	input:focus-visible + .slider {
+		outline: 2px solid var(--highlight);
+		outline-offset: 2px;
 	}
 
 	input:checked + .slider:before {
-		-webkit-transform: translateX(20px);
-		-ms-transform: translateX(20px);
-		transform: translateX(20px);
+		transform: translateX(18px);
 	}
 </style>

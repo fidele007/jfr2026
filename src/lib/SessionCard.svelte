@@ -1,248 +1,220 @@
 <script lang="ts">
   import { base } from "$app/paths";
-  import { onMount } from "svelte";
   import { getFriendlyDate, getTimeEmoji } from "./Constants.svelte";
 
   export let info: any;
 
-  let responsables: string;
-  let moderators: string;
-  let speakers: string;
-  let organizers: string;
-  let tags: [string];
+  const membersOf = (roleName: string) =>
+    info.outerRoles
+      ?.find((role: any) => role.name === roleName)
+      ?.members.items.map((item: any) => `${item.firstName} ${item.lastName}`)
+      .join(", ");
 
-  const onSessionCardClick = () => {
-    window.location.assign(`${base}/session?id=${info.id}`);
-  };
+  $: responsables = membersOf("responsable");
+  $: moderators = membersOf("modérateur");
+  $: speakers = membersOf("speaker");
+  $: organizers = info.organizers?.map((item: any) => item.name).join(", ");
+  $: tags = info.tracks?.map((track: any) => track.label) as string[] | undefined;
 
-  onMount(() => {
-    const responsableRole = info.outerRoles?.find((role: any) => role.name === "responsable");
-    if (responsableRole) {
-      responsables = responsableRole.members.items.map((item: any) => `${item.firstName} ${item.lastName}`).join(", ");
-    }
-
-    const moderatorRole = info.outerRoles?.find((role: any) => role.name === "modérateur");
-    if (moderatorRole) {
-      moderators = moderatorRole.members.items.map((item: any) => `${item.firstName} ${item.lastName}`).join(", ");
-    }
-
-    const speakerRole = info.outerRoles?.find((role: any) => role.name === "speaker");
-    if (speakerRole) {
-      speakers = speakerRole.members.items.map((item: any) => `${item.firstName} ${item.lastName}`).join(", ");
-    }
-
-    organizers = info.organizers?.map((item: any) => item.name).join(", ");
-
-    tags = info.tracks?.map((track: any) => track.label);
-  });
+  $: startTime = info.start.split("T")[1].split("+")[0];
+  $: endTime = info.end.split("T")[1].split("+")[0];
+  $: typeColor = info.sessionTypeColor !== "#000000" ? info.sessionTypeColor : "var(--text-muted)";
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="card" style="border-left-color: {info.sessionTypeColor}" on:click={onSessionCardClick}>
+<a class="card" href="{base}/session?id={info.id}" style="--type-color: {typeColor}">
   <div class="card-info">
-    <div class="card-info-header">
-      <div>
-        <div class="card-type" style="color: {info.sessionTypeColor !== '#000000' ? info.sessionTypeColor : '#dfdfdf'}">{info.sessionType}</div>
-        <div class="card-title">{info.title}</div>
-        <div class="date-time subtitle">
-          <div>🗓️ {getFriendlyDate(info.start.split("T")[0])}</div>
-          <div>
-            {getTimeEmoji(info.start.split("T")[1].split("+")[0])}
-            {info.start.split("T")[1].split("+")[0] + " - " + info.end.split("T")[1].split("+")[0]}
-          </div>
-        </div>
-      </div>
-      {#if info.picture}
-        <div class="thumbnail-container-small-screen">
-          <img src={info.picture} alt={info.title} class="thumbnail" />
-        </div>
-      {/if}
+    <div class="card-type">{info.sessionType}</div>
+    <h2 class="card-title">{info.title}</h2>
+    <div class="date-time subtitle">
+      <span>🗓️ {getFriendlyDate(info.start.split("T")[0])}</span>
+      <span>{getTimeEmoji(startTime)} {startTime} – {endTime}</span>
     </div>
-    {#if responsables}
-      <div>
-        <span class="participant-role-label">Responsable : </span>
-        <span class="participant-value">{responsables}</span>
-      </div>
-    {/if}
-    {#if moderators}
-      <div>
-        <span class="participant-role-label">Modérateur : </span>
-        <span class="participant-value">{moderators}</span>
-      </div>
-    {/if}
-    {#if speakers}
-      <div>
-        <span class="participant-role-label">Orateurs : </span>
-        <span class="participant-value">{speakers}</span>
-      </div>
-    {/if}
-    {#if organizers}
-      <div>
-        <span class="participant-role-label">Organisateur : </span>
-        <span class="participant-value">{organizers}</span>
-      </div>
-    {/if}
-    {#if tags}
+    <dl class="participants">
+      {#if responsables}
+        <div><dt>Responsable</dt><dd>{responsables}</dd></div>
+      {/if}
+      {#if moderators}
+        <div><dt>Modérateur</dt><dd>{moderators}</dd></div>
+      {/if}
+      {#if speakers}
+        <div><dt>Orateurs</dt><dd>{speakers}</dd></div>
+      {/if}
+      {#if organizers}
+        <div><dt>Organisateur</dt><dd>{organizers}</dd></div>
+      {/if}
+    </dl>
+    {#if tags && tags.length > 0}
       <div class="tag-list">
         {#each tags as tag}
-          <div class="tag-name">{tag}</div>
+          <span class="tag-name">{tag}</span>
         {/each}
       </div>
     {/if}
   </div>
-  <div class="thumbnail-container-big-screen">
-    {#if info.picture}
-      <img src={info.picture} alt={info.title} class="thumbnail" />
-    {/if}
-  </div>
-</div>
+  {#if info.picture}
+    <div class="thumbnail-container">
+      <img src={info.picture} alt="" class="thumbnail" loading="lazy" decoding="async" />
+      <span class="play-badge" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z" /></svg>
+      </span>
+      <span class="visually-hidden">Vidéos disponibles</span>
+    </div>
+  {/if}
+</a>
 
 <style>
   .card {
     display: flex;
-    justify-content: space-between;
-    gap: 5px;
-    padding: 0.6em 1.2em;
-    border-radius: 8px;
-    background-color: #1a1a1a;
-    -webkit-transition: all 100ms ease-in-out;
-    transition: all 200ms ease-in-out;
-    border: none;
-    -webkit-box-shadow: 0 1px 7px rgba(0, 0, 0, 0.05);
-    box-shadow: 0 5px 7px rgba(0, 0, 0, 0.05);
-    min-height: 130px;
-    border-left: 6px solid #dfdfdf;
-  }
-
-  .card-title {
-    font-size: 1rem;
-    font-weight: 700;
-    text-overflow: ellipsis;
+    gap: 16px;
+    padding: 14px 16px 14px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--type-color);
+    background-color: var(--surface);
+    box-shadow: var(--shadow);
+    color: inherit;
+    font-weight: normal;
+    text-align: left;
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      transform 0.15s ease;
   }
 
   .card:hover {
-    transform: scale(1.02);
-    cursor: pointer;
+    background-color: var(--surface-hover);
+    border-color: var(--text-muted);
+    border-left-color: var(--type-color);
+    transform: translateY(-1px);
   }
 
   .card-info {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    text-align: left;
-    gap: 5px;
-    flex-grow: 1;
-  }
-
-  .card-info-header {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
   }
 
   .card-type {
+    color: var(--type-color);
     font-size: 0.75rem;
     font-weight: 700;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
   }
 
-  .participant-role-label {
-    color: rgb(161, 152, 140);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
+  .card-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.3;
   }
 
-  .participant-value {
-    color: rgb(191, 185, 177);
+  .card:hover .card-title {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .participants {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 4px 0 0;
     font-size: 0.875rem;
+  }
+
+  .participants div {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 6px;
+    align-items: baseline;
+  }
+
+  .participants dt {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .participants dd {
+    margin: 0;
     font-weight: 600;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
   }
 
   .tag-name {
-    background-color: rgba(35, 184, 42, 0.067);
-    border-color: rgb(35, 184, 42);
+    background-color: rgb(35 184 42 / 12%);
     border-radius: 50px;
-    color: rgb(169, 161, 150);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: var(--text-muted);
     font-size: 0.75rem;
     font-weight: 600;
-    padding: 2px 8px;
+    padding: 2px 10px;
   }
 
-  .thumbnail-container-big-screen {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    min-width: 400px;
-    max-width: 50%;
-    width: 20%;
-  }
-
-  .thumbnail-container-big-screen > img {
-    border-radius: 5px;
+  .thumbnail-container {
+    position: relative;
+    flex: 0 0 auto;
+    align-self: center;
+    width: 280px;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background-color: var(--surface-sunken);
+    border: 1px solid var(--border);
   }
 
   .thumbnail {
-    /* filter: grayscale(1); */
-    -o-object-fit: contain;
-    object-fit: contain;
-    max-width: 100%;
-    height: 150px;
-    max-height: 100%;
-    border: 1px solid rgb(161 152 140 / 25%);
-  }
-
-  .thumbnail-container-small-screen {
-    display: none;
-    height: 100%;
+    display: block;
     width: 100%;
-    max-height: 20vw;
-    max-width: 20vw;
-  }
-
-  .thumbnail-container-small-screen > img {
-    -o-object-fit: cover;
+    height: 100%;
     object-fit: cover;
-    border-radius: 5px;
   }
 
-  @media (prefers-color-scheme: light) {
+  .play-badge {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: rgb(0 0 0 / 65%);
+    color: #fff;
+  }
+
+  @media (max-width: 900px) {
+    .thumbnail-container {
+      width: 200px;
+    }
+  }
+
+  @media (max-width: 600px) {
     .card {
-      background-color: #f9f9f9;
+      flex-direction: column-reverse;
+      gap: 10px;
+      padding: 12px 12px 12px 14px;
     }
 
-    .participant-value {
-      color: #414141;
+    .thumbnail-container {
+      width: 100%;
+      align-self: stretch;
     }
 
-    .tag-name {
-      color: #646464;
-    }
-  }
-
-  @media (max-width: 750px) {
-    .thumbnail-container-big-screen {
-      display: none;
-    }
-
-    .thumbnail-container-small-screen {
-      display: flex;
-    }
-
-    .card-info {
-      gap: unset;
-    }
-  }
-
-  @media (max-width: 1000px) {
-    .thumbnail {
-      height: unset;
+    .card-title {
+      font-size: 1rem;
     }
   }
 </style>

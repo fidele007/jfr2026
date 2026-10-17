@@ -8,6 +8,13 @@ declare global {
 		// interface PageState {}
 		// interface Platform {}
 	}
+
+	// YouTube IFrame API, loaded at runtime on the session page
+	const YT: any;
+	interface Window {
+		YT?: any;
+		onYouTubeIframeAPIReady?: () => void;
+	}
 }
 
 export {};

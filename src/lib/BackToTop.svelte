@@ -20,22 +20,24 @@
 </script>
 
 <svelte:window on:scroll={handleOnScroll} />
-<button class="back-to-top" on:click={goTop} title="Back To Top" class:hidden>
-	<svg width="32px" height="32px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-		><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
-			id="SVGRepo_tracerCarrier"
+<button
+	type="button"
+	class="back-to-top"
+	on:click={goTop}
+	title="Revenir en haut"
+	aria-label="Revenir en haut"
+	class:hidden
+	tabindex={hidden ? -1 : 0}
+>
+	<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+		<path
+			d="M17 15L12 10L7 15"
+			stroke="currentColor"
+			stroke-width="2.2"
 			stroke-linecap="round"
 			stroke-linejoin="round"
-		></g><g id="SVGRepo_iconCarrier">
-			<path
-				d="M17 15L12 10L7 15"
-				stroke="#81e480"
-				stroke-width="2.0"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			></path>
-		</g></svg
-	>
+		></path>
+	</svg>
 </button>
 
 <style>
@@ -43,29 +45,36 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		opacity: 1;
-		transition:
-			opacity 0.5s,
-			visibility 0.5s;
 		position: fixed;
 		z-index: 99;
 		right: 20px;
-		user-select: none;
-		bottom: 20px;
-		color: white;
-		font-size: 28px;
+		bottom: calc(20px + env(safe-area-inset-bottom));
+		width: 44px;
+		height: 44px;
 		border: none;
-		border-radius: 5px;
-		padding: 0.05rem;
-		background-color: #2849ea;
+		border-radius: 50%;
+		background-color: var(--accent);
+		color: #fff;
+		box-shadow: 0 4px 14px rgb(0 0 0 / 30%);
 		cursor: pointer;
-		min-width: 40px;
-		max-width: 40px;
-		min-height: 40px;
-		max-height: 40px;
+		user-select: none;
+		opacity: 1;
+		transition:
+			opacity 0.3s,
+			visibility 0.3s,
+			background-color 0.15s;
+	}
+	.back-to-top:hover {
+		background-color: var(--accent-hover);
 	}
 	.back-to-top.hidden {
 		opacity: 0;
 		visibility: hidden;
+	}
+	@media (max-width: 720px) {
+		.back-to-top {
+			right: 14px;
+			bottom: calc(14px + env(safe-area-inset-bottom));
+		}
 	}
 </style>

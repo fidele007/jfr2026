@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import { getFriendlyDate, getTimeEmoji } from '$lib/Constants.svelte';
 	import { mediaHistory, prefs } from '../../stores';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import MediaCard from '$lib/MediaCard.svelte';
 	import MediaHistoryButton from '$lib/MediaHistoryButton.svelte';
@@ -11,7 +11,8 @@
 	import Speakers from '$lib/Speakers.svelte';
 	import Switch from '$lib/Switch.svelte';
 
-	const USE_YOUTUBE_PLAYER = true;
+	// Use the YouTube player when a mapping file exists; otherwise fall back to the native player
+	let useYoutubePlayer = false;
 
 	const MEDIA_HISTORY_LIMIT = 25;
 
@@ -25,6 +26,7 @@
 	}
 
 	let loading = true;
+	let loadError = false;
 	let sessionDetail: any;
 	let eventDetail: any;
 	let objectives: string;
@@ -32,6 +34,7 @@
 	let responsables: [any];
 
 	let player: any;
+	let videoElement: HTMLVideoElement;
 	let currentMedia: any;
 	let previousMedia: any;
 	let autoplay: boolean = $prefs?.autoplay ?? false;
@@ -55,7 +58,7 @@
 	};
 
 	const getVideoUrl = (videoMapping: { [key: string]: string }, originalUrl: string) => {
-		if (!USE_YOUTUBE_PLAYER || !originalUrl) {
+		if (!useYoutubePlayer || !originalUrl) {
 			return originalUrl;
 		}
 
@@ -65,11 +68,42 @@
 			: originalUrl;
 	};
 
-	onMount(async () => {
-		// await new Promise(r => setTimeout(r, 3000));
+	const loadVideoMapping = async () => {
+		try {
+			const response = await fetch(`${base}/json/yt-video-mapping.json`);
+			if (!response.ok) return {};
+			return await response.json();
+		} catch {
+			return {};
+		}
+	};
 
-		const response = await fetch(`${base}/json/${sessionId}.json`);
-		sessionDetail = await response.json();
+	const createYoutubePlayer = () => {
+		const videoId = currentMedia.hdUrl.split('/').pop();
+		player = new YT.Player('player', {
+			videoId: videoId,
+			playerVars: {
+				modestbranding: 1,
+				playsinline: 1,
+				controls: 2,
+				autoplay: autoplay ? 1 : 0,
+				rel: 0 // Disable related videos at the end
+			},
+			events: {
+				onStateChange: onPlayerStateChange
+			}
+		});
+	};
+
+	onMount(async () => {
+		try {
+			const response = await fetch(`${base}/json/${sessionId}.json`);
+			sessionDetail = await response.json();
+		} catch {
+			loadError = true;
+			loading = false;
+			return;
+		}
 		eventDetail = sessionDetail.data.event;
 
 		objectives = eventDetail.objectives
@@ -80,9 +114,8 @@
 		responsables = eventDetail.roles.find((role: any) => role.name === 'responsable')?.assignees
 			.items;
 
-		const videoMapping = USE_YOUTUBE_PLAYER
-			? await (await fetch(`${base}/json/yt-video-mapping.json`)).json()
-			: {};
+		const videoMapping = await loadVideoMapping();
+		useYoutubePlayer = Object.keys(videoMapping).length > 0;
 
 		// Add publicly available media to the media list
 		for (const item of eventDetail.schedule.items) {
@@ -130,36 +163,27 @@
 
 		loading = false;
 
-		if (USE_YOUTUBE_PLAYER) {
-			window.onYouTubeIframeAPIReady = () => {
-				const videoId = currentMedia.hdUrl.split('/').pop();
-				player = new YT.Player('player', {
-					videoId: videoId,
-					playerVars: {
-						modestbranding: 1,
-						playsinline: 1,
-						controls: 2,
-						autoplay: autoplay ? 1 : 0,
-						rel: 0 // Disable related videos at the end
-					},
-					events: {
-						onStateChange: onPlayerStateChange
-					}
-				});
-			};
+		if (useYoutubePlayer && currentMedia) {
+			if (window.YT?.Player) {
+				// API already loaded by a previous visit (client-side navigation)
+				setTimeout(createYoutubePlayer);
+			} else {
+				window.onYouTubeIframeAPIReady = createYoutubePlayer;
 
-			// Load YouTube IFrame API asynchronously
-			const tag = document.createElement('script');
-			tag.src = 'https://www.youtube.com/iframe_api';
-			document.body.appendChild(tag);
+				// Load YouTube IFrame API asynchronously
+				const tag = document.createElement('script');
+				tag.src = 'https://www.youtube.com/iframe_api';
+				document.body.appendChild(tag);
+			}
+		}
+	});
 
-			// Cleanup on destroy
-			return () => {
-				if (player && player.destroy) {
-					player.destroy();
-				}
-				delete window.onYouTubeIframeAPIReady;
-			};
+	onDestroy(() => {
+		if (player && player.destroy) {
+			player.destroy();
+		}
+		if (browser) {
+			delete window.onYouTubeIframeAPIReady;
 		}
 	});
 
@@ -172,21 +196,31 @@
 	};
 
 	const playMedia = (media: any) => {
-		if (!USE_YOUTUBE_PLAYER || !player || !media || media === previousMedia) {
+		if (!media || media === previousMedia) {
 			return;
 		}
-
-		const videoId = media.hdUrl.split('/').pop();
-		player.loadVideoById(videoId);
-		onMediaPlay(media);
-
 		previousMedia = media;
+
+		if (useYoutubePlayer) {
+			if (!player) return;
+			const videoId = media.hdUrl.split('/').pop();
+			player.loadVideoById(videoId);
+			onMediaPlay(media);
+		} else if (videoElement) {
+			// The src binding updates on the next tick; start playback once the new source is ready
+			videoElement.addEventListener('loadeddata', () => videoElement.play().catch(() => {}), {
+				once: true
+			});
+		}
+
+		if (window.matchMedia('(max-width: 1000px)').matches) {
+			document.getElementById('video-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
 	};
 
 	const onMediaPlay = (media: any) => {
 		const filteredArray = $mediaHistory.filter((item: any) => item.hdUrl !== media.hdUrl);
 
-		// console.log("onMediaPlay", media);
 		const historyMedia = structuredClone(media);
 		historyMedia['sessionId'] = sessionId;
 		historyMedia['sessionTitle'] = eventDetail.title;
@@ -204,28 +238,41 @@
 		const mediaIndex = mediaList.indexOf(media);
 		if (mediaIndex < mediaList.length - 1) {
 			currentMedia = mediaList[mediaIndex + 1];
-			playMedia(currentMedia);
 		}
 	};
 
+	const toTime = (iso: string) => iso?.split('T')[1].split('+')[0];
+
 	$: if ($prefs) $prefs = { autoplay: autoplay };
 	$: currentMedia, playMedia(currentMedia);
+	$: typeColor =
+		eventDetail && eventDetail.sessionTypeColor !== '#000000'
+			? eventDetail.sessionTypeColor
+			: 'var(--text-muted)';
 </script>
 
 <svelte:head>
-	<title>{eventDetail ? eventDetail.title : 'JFR 2026'}</title>
+	<title>{eventDetail ? `${eventDetail.title} — JFR 2026` : 'JFR 2026'}</title>
 </svelte:head>
 
-<main>
-	<div id="navbar">
-		<a href="{base}/" class="one-liner">
-			<i class="gg-chevron-left"></i> Retour
+<header class="topbar sticky-top">
+	<div class="topbar-inner">
+		<a href="{base}/" class="btn back-link">
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+				<path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+			<span>Sessions</span>
 		</a>
+		{#if eventDetail}
+			<div class="topbar-title" title={eventDetail.title}>{eventDetail.title}</div>
+		{/if}
 		<MediaHistoryButton />
 	</div>
+</header>
 
+<main style="--type-color: {typeColor}">
 	{#if loading}
-		<div class="DNA_cont">
+		<div class="DNA_cont" aria-label="Chargement" role="status">
 			<div class="nucleobase"></div>
 			<div class="nucleobase"></div>
 			<div class="nucleobase"></div>
@@ -239,23 +286,28 @@
 		</div>
 	{/if}
 
+	{#if loadError}
+		<div class="error-state">
+			<p><strong>Session introuvable</strong></p>
+			<p>Le lien est peut-être incorrect ou la session n'existe plus.</p>
+			<a href="{base}/" class="btn">Retour aux sessions</a>
+		</div>
+	{/if}
+
 	{#if !loading && eventDetail}
-		{#if mediaList.length > 0}
-			<div class="media">
-				<div class="current-media">
-					<div id="current-media-info">
-						<div><strong>{currentMedia.title ?? '😶‍🌫️'}</strong></div>
-						{#if currentMedia.speakers}
-							<Speakers speakers={currentMedia.speakers} />
-						{/if}
-					</div>
+		<div class="layout" class:no-media={mediaList.length == 0}>
+			{#if mediaList.length > 0}
+				<section class="player-area" aria-label="Lecteur vidéo">
 					<div id="video-container">
-						{#if USE_YOUTUBE_PLAYER}
+						{#if useYoutubePlayer}
 							<div id="player"></div>
 						{:else}
 							<video
+								bind:this={videoElement}
 								{autoplay}
 								controls
+								playsinline
+								preload="metadata"
 								class="video-player"
 								src={getBestMediaSource(currentMedia)}
 								poster={currentMedia.thumbnail}
@@ -266,68 +318,18 @@
 							</video>
 						{/if}
 					</div>
-					<div class="detail screen-big" style="border-left-color: {eventDetail.sessionTypeColor}">
-						<div class="session-header">
-							<div
-								class="session-type"
-								style="color: {eventDetail.sessionTypeColor !== '#000000'
-									? eventDetail.sessionTypeColor
-									: '#dfdfdf'}"
-							>
-								{eventDetail.sessionType}
-							</div>
-							<h1>{eventDetail.title}</h1>
-							<div class="date-time subtitle">
-								<div>
-									🗓️ {getFriendlyDate(eventDetail.start?.split('T')[0])}
-								</div>
-								<div>
-									{getTimeEmoji(eventDetail.start?.split('T')[1].split('+')[0])}
-									{eventDetail.start?.split('T')[1].split('+')[0] +
-										' - ' +
-										eventDetail.end?.split('T')[1].split('+')[0]}
-								</div>
-							</div>
-						</div>
-						{#if objectives}
-							<div class="objectives">
-								<strong>Objectifs :</strong>
-								<div>
-									{@html objectives}
-								</div>
-							</div>
-						{/if}
-						{#if moderators || responsables}
-							<table class="person-list">
-								<tbody>
-									{#if moderators}
-										<tr>
-											<td class="role-label">Modérateur :</td>
-											<td>
-												{#each moderators as person}
-													<Person info={person} />
-												{/each}
-											</td>
-										</tr>
-									{/if}
-									{#if responsables}
-										<tr>
-											<td class="role-label">Responsable :</td>
-											<td>
-												{#each responsables as person}
-													<Person info={person} />
-												{/each}
-											</td>
-										</tr>
-									{/if}
-								</tbody>
-							</table>
+					<div id="current-media-info">
+						<div class="now-playing">En cours de lecture</div>
+						<h2>{currentMedia.title ?? '😶‍🌫️'}</h2>
+						{#if currentMedia.speakers}
+							<Speakers speakers={currentMedia.speakers} />
 						{/if}
 					</div>
-				</div>
-				<div class="playlist-container">
+				</section>
+
+				<aside class="playlist-container" aria-label="Liste de lecture">
 					<div id="playlist-title">
-						<strong>Liste de lecture ({mediaList.length}):</strong>
+						<strong>Liste de lecture <span class="count">{mediaList.length}</span></strong>
 						<Switch bind:checked={autoplay} />
 					</div>
 					<div class="playlist">
@@ -335,324 +337,382 @@
 							<MediaCard media={item} downloadable={true} bind:currentMedia />
 						{/each}
 					</div>
-				</div>
-			</div>
-		{/if}
-		<div
-			class="detail screen-small {mediaList.length == 0 ? 'no-media' : ''}"
-			style="border-left-color: {eventDetail.sessionTypeColor}"
-		>
-			<div class="session-header">
-				<div
-					class="session-type"
-					style="color: {eventDetail.sessionTypeColor !== '#000000'
-						? eventDetail.sessionTypeColor
-						: '#dfdfdf'}"
-				>
-					{eventDetail.sessionType}
-				</div>
-				<h1>{eventDetail.title}</h1>
-				<div class="date-time subtitle">
-					<div>
-						🗓️ {getFriendlyDate(eventDetail.start?.split('T')[0])}
-					</div>
-					<div>
-						{getTimeEmoji(eventDetail.start?.split('T')[1].split('+')[0])}
-						{eventDetail.start?.split('T')[1].split('+')[0] +
-							' - ' +
-							eventDetail.end?.split('T')[1].split('+')[0]}
-					</div>
-				</div>
-			</div>
-			{#if objectives}
-				<div class="objectives">
-					<strong>Objectifs :</strong>
-					<div>
-						{@html objectives}
-					</div>
-				</div>
+				</aside>
 			{/if}
-			{#if moderators || responsables}
-				<table class="person-list">
-					<tbody>
+
+			<article class="detail">
+				<div class="session-header">
+					<div class="session-type">{eventDetail.sessionType}</div>
+					<h1>{eventDetail.title}</h1>
+					<div class="date-time subtitle">
+						<span>🗓️ {getFriendlyDate(eventDetail.start?.split('T')[0])}</span>
+						<span>
+							{getTimeEmoji(toTime(eventDetail.start))}
+							{toTime(eventDetail.start)} – {toTime(eventDetail.end)}
+						</span>
+					</div>
+				</div>
+				{#if mediaList.length == 0}
+					<p class="no-media-note">Aucune vidéo n'est disponible pour cette session.</p>
+				{/if}
+				{#if objectives}
+					<div class="objectives">
+						<h3>Objectifs</h3>
+						<div>
+							{@html objectives}
+						</div>
+					</div>
+				{/if}
+				{#if moderators || responsables}
+					<dl class="person-list">
 						{#if moderators}
-							<tr>
-								<td class="role-label">Modérateur :</td>
-								<td>
+							<div>
+								<dt>Modérateur</dt>
+								<dd>
 									{#each moderators as person}
 										<Person info={person} />
 									{/each}
-								</td>
-							</tr>
+								</dd>
+							</div>
 						{/if}
 						{#if responsables}
-							<tr>
-								<td class="role-label">Responsable :</td>
-								<td>
+							<div>
+								<dt>Responsable</dt>
+								<dd>
 									{#each responsables as person}
 										<Person info={person} />
 									{/each}
-								</td>
-							</tr>
+								</dd>
+							</div>
 						{/if}
-					</tbody>
-				</table>
-			{/if}
+					</dl>
+				{/if}
+			</article>
 		</div>
 	{/if}
 </main>
 
 <style>
-	* {
-		box-sizing: border-box;
+	.topbar {
+		border-bottom: 1px solid var(--border);
 	}
 
-	#navbar {
-		display: flex;
-		justify-content: space-between;
-		width: 100%;
-	}
-
-	.one-liner {
+	.topbar-inner {
 		display: flex;
 		align-items: center;
+		gap: 12px;
+		max-width: 1440px;
+		margin: 0 auto;
+		padding: 10px 16px;
 	}
 
-	.gg-chevron-left {
-		box-sizing: border-box;
-		position: relative;
-		display: block;
-		transform: scale(var(--ggs, 1));
-		width: 22px;
-		height: 22px;
-		border: 2px solid transparent;
-		border-radius: 100px;
+	.back-link {
+		padding-left: 8px;
 	}
-	.gg-chevron-left::after {
-		content: '';
-		display: block;
-		box-sizing: border-box;
-		position: absolute;
-		width: 10px;
-		height: 10px;
-		border-bottom: 2px solid;
-		border-left: 2px solid;
-		transform: rotate(45deg);
-		left: 6px;
-		top: 4px;
+
+	.topbar-title {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		font-weight: 600;
+		color: var(--text-muted);
 	}
 
 	main {
+		max-width: 1440px;
+		margin: 0 auto;
+		padding: 16px;
+	}
+
+	.layout {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 380px;
+		grid-template-areas:
+			'player playlist'
+			'detail playlist';
+		grid-template-rows: auto 1fr;
+		gap: 16px;
+		align-items: start;
+	}
+
+	.layout.no-media {
+		grid-template-columns: minmax(0, 860px);
+		grid-template-areas: 'detail';
+		justify-content: center;
+	}
+
+	.player-area {
+		grid-area: player;
+		border-radius: var(--radius);
+		overflow: hidden;
+		background-color: var(--surface);
+		border: 1px solid var(--border);
+	}
+
+	#video-container {
+		display: flex;
+		aspect-ratio: 16 / 9;
+		background-color: #000;
+		scroll-margin-top: 70px;
+	}
+
+	#video-container > video {
+		width: 100%;
+		height: 100%;
+	}
+
+	#player {
+		width: 100%;
+		height: 100%;
+	}
+
+	#current-media-info {
 		display: flex;
 		flex-direction: column;
-		align-items: flex-start;
-		gap: 10px;
-		padding: 15px;
-		max-height: 100%;
-		width: 100%;
+		gap: 4px;
+		padding: 12px 16px 14px;
+	}
+
+	.now-playing {
+		color: var(--text-muted);
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	#current-media-info h2 {
+		margin: 0;
+		font-size: 1.1rem;
+		line-height: 1.3;
+	}
+
+	.playlist-container {
+		grid-area: playlist;
+		position: sticky;
+		top: 76px;
+		display: flex;
+		flex-direction: column;
+		max-height: calc(100vh - 92px);
+		border-radius: var(--radius);
+		overflow: hidden;
+		background-color: var(--surface);
+		border: 1px solid var(--border);
+	}
+
+	#playlist-title {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 14px;
+		border-bottom: 1px solid var(--border);
+	}
+
+	.count {
+		display: inline-block;
+		min-width: 22px;
+		margin-left: 4px;
+		padding: 0 7px;
+		border-radius: 50px;
+		background-color: var(--surface-hover);
+		color: var(--text-muted);
+		font-size: 0.8rem;
+		text-align: center;
+	}
+
+	.playlist {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: 6px;
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 
 	.detail {
+		grid-area: detail;
+		display: flex;
 		flex-direction: column;
-		flex-grow: 0;
-		gap: 10px;
-		border-left: 6px solid;
-		border-radius: 4px;
-		padding: 16px;
-		width: 100%;
+		gap: 16px;
+		padding: 18px 20px;
+		border-radius: var(--radius);
+		border: 1px solid var(--border);
+		border-left: 5px solid var(--type-color);
+		background-color: var(--surface);
 	}
 
 	.session-type {
+		color: var(--type-color);
 		font-size: 0.75rem;
 		font-weight: 700;
+		letter-spacing: 0.02em;
 		text-transform: uppercase;
 	}
 
 	.session-header {
 		display: flex;
 		flex-direction: column;
-		align-items: baseline;
+		gap: 4px;
 	}
 
 	h1 {
-		font-size: 20px;
+		margin: 0;
+		font-size: 1.5rem;
+	}
+
+	.no-media-note {
+		margin: 0;
+		padding: 10px 14px;
+		border-radius: var(--radius-sm);
+		background-color: var(--surface-hover);
+		color: var(--text-muted);
 	}
 
 	.objectives {
-		border: 1px solid #e5e5e5;
-		border-radius: 4px;
-		padding: 15px;
-		font-size: 0.9rem;
+		padding: 14px 16px;
+		border-radius: var(--radius-sm);
+		background-color: var(--surface-sunken);
+		font-size: 0.95rem;
+		line-height: 1.5;
+	}
+
+	.objectives h3 {
+		margin: 0;
+		font-size: 0.8rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--text-muted);
 	}
 
 	:global(.objectives-value) {
-		margin-top: 10px;
+		margin-top: 8px;
 	}
 
-	/* blockquote,dl,dd,h1,h2,h3,h4,h5,h6,hr,figure,p,pre { */
 	:global(.objectives p) {
 		margin: 0;
 	}
 
-	.role-label {
-		color: #8e8e8e;
+	.person-list {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		margin: 0;
+	}
+
+	.person-list > div {
+		display: flex;
+		gap: 12px;
+	}
+
+	.person-list dt {
+		flex: 0 0 100px;
+		padding-top: 8px;
+		color: var(--text-muted);
 		font-size: 0.75rem;
-		font-weight: 600;
-		margin-right: 8px;
+		font-weight: 700;
 		text-transform: uppercase;
 	}
 
-	table.person-list {
-		table-layout: auto;
-		width: fit-content;
-	}
-
-	table.person-list > tbody tr td:first-child {
-		vertical-align: top;
-		padding-top: 10px;
-		min-width: 90px;
-	}
-
-	table.person-list > tbody tr td:last-child {
+	.person-list dd {
 		display: flex;
-		align-items: center;
-		gap: 10px;
 		flex-wrap: wrap;
+		gap: 12px 20px;
+		margin: 0;
 	}
 
-	.media {
-		display: flex;
-		gap: 15px;
-		flex-grow: 1;
-		width: 100%;
-		min-height: 469px;
-	}
-
-	#current-media-info,
-	#playlist-title {
+	.error-state {
 		display: flex;
 		flex-direction: column;
-		border-top-left-radius: 4px;
-		border-top-right-radius: 4px;
-		padding: 8px 12px;
-		background-color: rgb(24, 26, 27);
-		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-	}
-
-	.playlist-container #playlist-title {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
 		align-items: center;
+		gap: 4px;
+		padding: 64px 16px;
+		text-align: center;
+		color: var(--text-muted);
 	}
 
-	.current-media {
-		display: flex;
-		flex-direction: column;
-		flex-grow: 1;
+	.error-state p {
+		margin: 0;
 	}
 
-	#video-container {
-		display: flex;
-		border-bottom-left-radius: 5px;
-		border-bottom-right-radius: 5px;
-		overflow: hidden;
-		transform: translateZ(0);
-		-webkit-transform: translateZ(0);
-		border: 1px solid;
-		border-color: rgb(24, 26, 27);
-		min-height: 411px;
+	.error-state strong {
+		color: var(--text);
+		font-size: 1.15rem;
 	}
 
-	#video-container > video {
-		width: 100%;
-	}
-
-	#player {
-		aspect-ratio: 16 / 9;
-		width: 100%;
-		height: auto;
-	}
-
-	.playlist-container {
-		flex: 0 0 35%;
-		display: flex;
-		flex-direction: column;
-		max-height: 100%;
-	}
-
-	.playlist {
-		display: flex;
-		flex-direction: column;
-		overflow-y: auto;
-		background-color: rgb(24, 26, 27);
-		border-bottom-left-radius: 5px;
-		border-bottom-right-radius: 5px;
-		padding: 5px;
+	.error-state .btn {
+		margin-top: 16px;
 	}
 
 	@media (max-width: 1000px) {
 		main {
-			max-height: fit-content;
-			padding: 8px;
+			padding: 0 0 32px;
 		}
 
-		.objectives {
-			width: 100%;
+		.topbar-inner {
+			padding: 8px 12px;
 		}
 
-		.media {
+		.layout {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-areas:
+				'player'
+				'playlist'
+				'detail';
+			grid-template-rows: auto;
+			gap: 12px;
+		}
+
+		.layout.no-media {
+			padding: 12px;
+		}
+
+		.player-area {
+			border-radius: 0;
+			border-left: none;
+			border-right: none;
+			border-top: none;
+		}
+
+		#video-container {
+			scroll-margin-top: 58px;
+		}
+
+		.playlist-container {
+			position: static;
+			max-height: 420px;
+			margin: 0 12px;
+		}
+
+		.detail {
+			margin: 0 12px;
+			padding: 14px 16px;
+		}
+
+		h1 {
+			font-size: 1.25rem;
+		}
+
+		.person-list > div {
 			flex-direction: column;
-			overflow-y: auto;
+			gap: 4px;
 		}
 
-		.playlist {
-			max-height: 450px;
-		}
-
-		.detail.screen-small {
-			display: flex;
-		}
-
-		.detail.screen-big {
-			display: none;
-		}
-
-		#video-container {
-			min-height: unset;
+		.person-list dt {
+			flex-basis: auto;
+			padding-top: 0;
 		}
 	}
 
-	@media (min-width: 1000px) {
-		.detail.screen-small:not(.no-media) {
+	@media (max-width: 600px) {
+		.topbar-title {
 			display: none;
 		}
 
-		.detail.screen-big {
-			display: flex;
-			margin-top: 10px;
-		}
-	}
-
-	@media (prefers-color-scheme: light) {
-		.detail,
-		.playlist {
-			background-color: #fff;
-		}
-
-		#current-media-info,
-		#playlist-title {
-			background-color: #fdfdfd;
-			border-bottom: 1px solid #dddddd;
-		}
-
-		#video-container {
-			border-color: #fdfdfd;
-		}
-
-		.objectives {
-			color: #545454;
-			background-color: #fdfdfd;
+		.topbar-inner {
+			justify-content: space-between;
 		}
 	}
 </style>

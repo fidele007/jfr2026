@@ -19,7 +19,7 @@
     const anchor = document.createElement("a");
     anchor.href = url;
 
-    const urlSplit = url.split(".");
+    const urlSplit = url.split("?")[0].split(".");
     const fileExtension = "." + urlSplit[urlSplit.length - 1];
     anchor.download = sanitizeFilename(title) + fileExtension;
 
@@ -29,19 +29,25 @@
     anchor.click();
     document.body.removeChild(anchor);
   };
+
+  $: selected = media == currentMedia;
 </script>
 
 <div
   title={media.title}
   class="media-item"
-  class:selected={media == currentMedia}
+  class:selected
+  aria-current={selected ? "true" : undefined}
   on:click={() => onClickMedia(media)}
-  on:keydown={(e) => e.key === "Enter" && onClickMedia(media)}
+  on:keydown={(e) => (e.key === "Enter" || e.key === " ") && e.target === e.currentTarget && (e.preventDefault(), onClickMedia(media))}
   tabindex="0"
   role="button"
 >
   <div class="thumbnail-container">
-    <img class="thumbnail" src={media.thumbnail} alt={media.title} />
+    <img class="thumbnail" src={media.thumbnail} alt="" loading="lazy" decoding="async" />
+    {#if selected}
+      <span class="playing-badge">▶ Lecture</span>
+    {/if}
   </div>
   <div class="video-details">
     {#if media.sessionTitle}
@@ -53,15 +59,21 @@
         <span>{getTimeEmoji(media.start)} {media.start}</span>
       {/if}
       {#if downloadable}
-        <button type="button" title="Télécharger" class="btn-download" on:click={() => onDownload(media.title, media.hdUrl ?? media.url)}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="svg-icon" xmlns="http://www.w3.org/2000/svg">
+        <button
+          type="button"
+          title="Télécharger la vidéo"
+          class="btn-download"
+          on:click|stopPropagation={() => onDownload(media.title, media.hdUrl ?? media.url)}
+          on:keydown|stopPropagation
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M11 5C11 4.44772 11.4477 4 12 4C12.5523 4 13 4.44772 13 5V12.1578L16.2428 8.91501L17.657 10.3292L12.0001 15.9861L6.34326 10.3292L7.75748 8.91501L11 12.1575V5Z"
               fill="currentColor"
             />
             <path d="M4 14H6V18H18V14H20V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V14Z" fill="currentColor" />
           </svg>
-          <div>Télécharger</div>
+          <span>Télécharger</span>
         </button>
       {/if}
     </div>
@@ -72,54 +84,38 @@
 </div>
 
 <style>
-  button {
-    all: unset;
-    display: inline-block;
-    text-align: initial;
-  }
-
-  .media-item:first-child {
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-  }
-
-  .media-item:last-child {
-    border-bottom-left-radius: 2px;
-    border-bottom-right-radius: 2px;
-  }
-
   .media-item {
     display: flex;
-    gap: 10px;
-    padding: 5px;
+    gap: 12px;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
     cursor: pointer;
+    transition: background-color 0.15s ease;
   }
 
-  .media-item.selected,
   .media-item:hover {
-    background-color: rgb(33, 36, 37);
+    background-color: var(--surface-hover);
   }
 
   .media-item.selected {
-    border-left: 3px solid blueviolet;
+    background-color: var(--surface-hover);
+    border-left-color: var(--highlight);
   }
 
   .media-title {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    display: box;
-    font-size: 14px;
     line-clamp: 2;
-    line-height: 1rem;
-    max-height: 2rem;
+    display: -webkit-box;
+    font-size: 0.9rem;
+    line-height: 1.25;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: normal;
-    display: -webkit-box;
   }
 
   .media-session-title {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
   }
@@ -127,56 +123,69 @@
   .video-details {
     display: flex;
     flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
   }
 
   .thumbnail-container {
-    display: flex;
-    height: 100px;
-    align-self: center;
-    align-items: center;
+    position: relative;
+    flex: 0 0 132px;
+    align-self: flex-start;
+    aspect-ratio: 16 / 9;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: var(--surface-sunken);
   }
 
   .thumbnail {
-    border-radius: 2px;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  img.thumbnail {
-    height: 100%;
-    object-fit: contain;
+  .playing-badge {
+    position: absolute;
+    left: 4px;
+    bottom: 4px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background-color: var(--highlight);
+    color: var(--on-highlight);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .subtitle {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .btn-download {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    border-radius: 5px;
-    border: none;
+    gap: 4px;
+    min-height: 28px;
+    padding: 0 8px;
+    border-radius: 50px;
+    border: 1px solid var(--border);
     background-color: transparent;
-    height: 24px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
 
-    &:hover {
-      color: white;
-      background-color: #0077ff;
-    }
+  .btn-download:hover {
+    color: #fff;
+    background-color: var(--accent);
+    border-color: var(--accent);
   }
 
   @media (max-width: 1000px) {
-    img.thumbnail {
-      height: 85%;
-    }
-  }
-
-  @media (prefers-color-scheme: light) {
-    .media-item {
-      background-color: #fff;
-    }
-
-    .media-item.selected,
-    .media-item:hover {
-      background-color: #d1d1d1;
-    }
-
-    .media-item.selected {
-      border-left: 3px solid blueviolet;
+    .thumbnail-container {
+      flex-basis: 112px;
     }
   }
 </style>
