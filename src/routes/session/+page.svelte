@@ -255,14 +255,12 @@
 		}
 
 		if (window.matchMedia('(max-width: 1000px)').matches) {
-			document
-				.getElementById('video-container')
-				?.scrollIntoView({
-					behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-						? 'instant'
-						: 'smooth',
-					block: 'start'
-				});
+			document.getElementById('video-container')?.scrollIntoView({
+				behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+					? 'instant'
+					: 'smooth',
+				block: 'start'
+			});
 		}
 	};
 
@@ -504,7 +502,7 @@
 
 	.layout {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) 380px;
+		grid-template-columns: minmax(0, 1fr) minmax(360px, 34%);
 		grid-template-areas:
 			'player playlist'
 			'detail playlist';
