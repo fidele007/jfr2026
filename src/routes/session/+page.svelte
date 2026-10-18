@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import { getFriendlyDate, getTimeEmoji } from '$lib/Constants.svelte';
 	import { mediaHistory, prefs } from '../../stores';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
 	import MediaCard from '$lib/MediaCard.svelte';
 	import MediaHistoryButton from '$lib/MediaHistoryButton.svelte';
@@ -11,7 +11,7 @@
 	import Speakers from '$lib/Speakers.svelte';
 	import Switch from '$lib/Switch.svelte';
 
-	// Use the YouTube player when a mapping file exists; otherwise fall back to the native player
+	// Choose the player for each media item independently.
 	let useYoutubePlayer = false;
 
 	const MEDIA_HISTORY_LIMIT = 25;
@@ -40,6 +40,7 @@
 	let autoplay: boolean = $prefs?.autoplay ?? false;
 
 	let mediaList: {
+		youtubeId?: string;
 		id: string | null;
 		title: string;
 		hdUrl: string;
@@ -57,15 +58,9 @@
 		return media.hdUrl;
 	};
 
-	const getVideoUrl = (videoMapping: { [key: string]: string }, originalUrl: string) => {
-		if (!useYoutubePlayer || !originalUrl) {
-			return originalUrl;
-		}
-
-		const videoId = originalUrl.split('/video/')[0].split('/').pop();
-		return videoId && videoId in videoMapping
-			? `https://www.youtube.com/embed/${videoMapping[videoId]}`
-			: originalUrl;
+	const getYoutubeId = (videoMapping: { [key: string]: string }, originalUrl: string) => {
+		const videoId = originalUrl?.split('/video/')[0].split('/').pop();
+		return videoId ? videoMapping[videoId] || undefined : undefined;
 	};
 
 	const loadVideoMapping = async () => {
@@ -79,7 +74,8 @@
 	};
 
 	const createYoutubePlayer = () => {
-		const videoId = currentMedia.hdUrl.split('/').pop();
+		if (!useYoutubePlayer || !currentMedia || player) return;
+		const videoId = currentMedia.youtubeId;
 		player = new YT.Player('player', {
 			videoId: videoId,
 			playerVars: {
@@ -90,7 +86,13 @@
 				rel: 0 // Disable related videos at the end
 			},
 			events: {
-				onStateChange: onPlayerStateChange
+				onStateChange: onPlayerStateChange,
+				onError: () => {
+					// Deleted, private, or embedding-disabled videos use the original sources.
+					currentMedia.youtubeId = undefined;
+					previousMedia = null;
+					currentMedia = currentMedia;
+				}
 			}
 		});
 	};
@@ -115,7 +117,6 @@
 			.items;
 
 		const videoMapping = await loadVideoMapping();
-		useYoutubePlayer = Object.keys(videoMapping).length > 0;
 
 		// Add publicly available media to the media list
 		for (const item of eventDetail.schedule.items) {
@@ -123,8 +124,9 @@
 				mediaList.push({
 					id: item.vod.media.id,
 					title: item.vod.media.id ? item.title : `${item.title} Ⓜ️`,
-					hdUrl: getVideoUrl(videoMapping, item.vod.media.element.sources[0].uri),
-					url: getVideoUrl(videoMapping, item.vod.media.element.sources[1]?.uri),
+					hdUrl: item.vod.media.element.sources[0].uri,
+					youtubeId: getYoutubeId(videoMapping, item.vod.media.element.sources[0].uri),
+					url: item.vod.media.element.sources[1]?.uri,
 					thumbnail: item.vod.media.thumbnail,
 					start: item.start.split('T')[1].split('+')[0],
 					speakers: item.speakers.items
@@ -141,8 +143,9 @@
 			mediaList.push({
 				id: eventDetail.vod.media.id,
 				title: eventDetail.vod.media.title ?? '[Sans titre]',
-				hdUrl: getVideoUrl(videoMapping, eventDetail.vod.media.element.sources[0].uri),
-				url: getVideoUrl(videoMapping, eventDetail.vod.media.element.sources[1]?.uri),
+				hdUrl: eventDetail.vod.media.element.sources[0].uri,
+					youtubeId: getYoutubeId(videoMapping, eventDetail.vod.media.element.sources[0].uri),
+				url: eventDetail.vod.media.element.sources[1]?.uri,
 				thumbnail: eventDetail.vod.media.thumbnail,
 				start: eventDetail.start.split('T')[1].split('+')[0],
 				speakers: eventDetail.speakers.items
@@ -153,29 +156,17 @@
 
 		if (mediaList.length > 0) {
 			if (selectedMediaUrl) {
-				previousMedia = currentMedia = mediaList.find((item) => item.hdUrl === selectedMediaUrl);
+				currentMedia = mediaList.find((item) => item.hdUrl === selectedMediaUrl ||
+					(item.youtubeId && `https://www.youtube.com/embed/${item.youtubeId}` === selectedMediaUrl));
 			}
 
 			if (!currentMedia) {
-				previousMedia = currentMedia = mediaList[0];
+				currentMedia = mediaList[0];
 			}
 		}
 
 		loading = false;
 
-		if (useYoutubePlayer && currentMedia) {
-			if (window.YT?.Player) {
-				// API already loaded by a previous visit (client-side navigation)
-				setTimeout(createYoutubePlayer);
-			} else {
-				window.onYouTubeIframeAPIReady = createYoutubePlayer;
-
-				// Load YouTube IFrame API asynchronously
-				const tag = document.createElement('script');
-				tag.src = 'https://www.youtube.com/iframe_api';
-				document.body.appendChild(tag);
-			}
-		}
 	});
 
 	onDestroy(() => {
@@ -195,19 +186,36 @@
 		}
 	};
 
-	const playMedia = (media: any) => {
+	const playMedia = async (media: any) => {
 		if (!media || media === previousMedia) {
 			return;
 		}
+		const shouldPlay = Boolean(previousMedia) || autoplay;
 		previousMedia = media;
 
+		const wasYoutube = useYoutubePlayer;
+		useYoutubePlayer = Boolean(media.youtubeId);
+		if (wasYoutube && !useYoutubePlayer && player) {
+			player.destroy();
+			player = undefined;
+		}
+		await tick();
+		if (media !== currentMedia) return;
+
 		if (useYoutubePlayer) {
-			if (!player) return;
-			const videoId = media.hdUrl.split('/').pop();
-			player.loadVideoById(videoId);
-			onMediaPlay(media);
-		} else if (videoElement) {
-			// The src binding updates on the next tick; start playback once the new source is ready
+			if (player) {
+				player.loadVideoById(media.youtubeId);
+			} else if (window.YT?.Player) {
+				createYoutubePlayer();
+			} else {
+				window.onYouTubeIframeAPIReady = createYoutubePlayer;
+				if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+					const tag = document.createElement('script');
+					tag.src = 'https://www.youtube.com/iframe_api';
+					document.body.appendChild(tag);
+				}
+			}
+		} else if (videoElement && shouldPlay) {
 			videoElement.addEventListener('loadeddata', () => videoElement.play().catch(() => {}), {
 				once: true
 			});
