@@ -69,20 +69,49 @@ queries. Keyword results appear first; the browser worker updates them after
 embedding the query. Date/video filters and alphabetical sorting still apply.
 If model loading fails, keyword search remains available.
 
-The quantized multilingual MiniLM model runs locally in a Web Worker using
-Transformers.js. Its first use downloads approximately 118 MB of model weights
-from Hugging Face, plus the tokenizer and WASM runtime. The browser caches model
-files for subsequent searches. Queries are processed locally, without an API key.
-The session vector index is approximately 638 KB uncompressed.
+The quantized multilingual E5-small retrieval model runs locally in a Web Worker
+using Transformers.js. Its first use downloads approximately 118 MB of model
+weights from Hugging Face, plus the tokenizer and WASM runtime. The browser caches
+model files for subsequent searches. Queries are processed locally, without an
+API key. This improves relevance; it does not reduce the model download size.
+
+Titles and session descriptions have separate embeddings (75% title, 25%
+description). E5 uses `query: ` and `passage: ` prefixes. A small word-match bonus
+uses corpus word frequencies to distinguish close semantic candidates, with
+accent/plural normalization. Similarity and relative-score cutoffs remove weak
+matches. Exact keyword matches, including speakers, remain first. The model
+revision is pinned in the generated index so index and query embeddings agree.
+Semantic-only cards show « Très pertinent » for hybrid scores of at least 0.92,
+and « Sujet proche » otherwise. This conservative display threshold is a
+heuristic for the current model, not calibrated confidence. The numeric ranking
+score remains available in a tooltip on hover or keyboard focus.
+Rapid typing replaces queued queries, and the worker caches the last 20 query
+vectors so changing filters does not require another inference.
 
 After changing `static/json/event.json`, regenerate and verify the committed index:
 
 ```sh
 bun run search:index
 node scripts/test-search.mjs
+bun test tests/semantic.test.ts
 ```
 
 Index generation uses Node.js and caches its model under `.cache/transformers/`.
 The same quantized model and mean pooling are used for indexing and queries.
-The retrieval smoke test checks index integrity and representative French queries;
-relevance thresholds may need tuning for further real-world queries.
+To inspect individual query rankings:
+
+```sh
+node scripts/evaluate-search.mjs
+```
+
+On the 24 hand-authored French development queries in `tests/search-queries.json`,
+compared with the MiniLM index in commit `92a74ba`, semantic-stage top-one hits
+improved from 10/24 to 19/24, and top-three hits from
+14/24 to 21/24. A separate 12-query set in `tests/search-holdout.json`, evaluated
+after tuning, had 12/12 top-one hits. These are title-pattern relevance checks,
+not independent clinical judgments or a guarantee for arbitrary queries. The
+regression test also checks index integrity and rejects three unrelated queries.
+
+Known weak queries remain: paraphrases about radiation exposure, leg veins, and
+testicular pain. Further tuning should use new examples and user feedback rather
+than loosening the relevance checks for those cases.

@@ -3,6 +3,14 @@
   import { getFriendlyDate, getTimeEmoji } from "./Constants.svelte";
 
   export let info: any;
+  export let semanticScore: number | undefined = undefined;
+
+  $: hasSemanticMatch = semanticScore !== undefined && Number.isFinite(semanticScore);
+  // Conservative display tier for the current E5 hybrid scores, not a confidence estimate.
+  $: matchLabel = semanticScore !== undefined && semanticScore >= 0.92 ? 'Très pertinent' : 'Sujet proche';
+  $: scoreDescription = hasSemanticMatch
+    ? `Score de classement : ${semanticScore!.toLocaleString('fr-FR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}. Combine proximité de sens et mots-clés ; ce n'est pas un pourcentage de confiance.`
+    : '';
 
   const membersOf = (roleName: string) =>
     info.outerRoles
@@ -21,9 +29,16 @@
   $: typeColor = info.sessionTypeColor !== "#000000" ? info.sessionTypeColor : "var(--text-muted)";
 </script>
 
-<a class="card" href="{base}/session?id={info.id}" style="--type-color: {typeColor}">
+<a class="card" href="{base}/session?id={info.id}" style="--type-color: {typeColor}"
+  aria-describedby={hasSemanticMatch ? `match-score-${info.id}` : undefined}>
   <div class="card-info">
     <div class="card-type">{info.sessionType}</div>
+    {#if hasSemanticMatch}
+      <span class="semantic-match">
+        {matchLabel}
+        <span class="score-tooltip" role="tooltip" id="match-score-{info.id}">{scoreDescription}</span>
+      </span>
+    {/if}
     <h2 class="card-title">{info.title}</h2>
     <div class="date-time subtitle">
       <span>🗓️ {getFriendlyDate(info.start.split("T")[0])}</span>
@@ -103,6 +118,37 @@
     font-weight: 700;
     letter-spacing: 0.02em;
     text-transform: uppercase;
+  }
+
+  .semantic-match {
+    position: relative;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    border-bottom: 1px dotted currentColor;
+    cursor: help;
+  }
+
+  .score-tooltip {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    top: calc(100% + 6px);
+    left: 0;
+    width: min(280px, 65vw);
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    font-weight: normal;
+  }
+
+  .semantic-match:hover .score-tooltip,
+  .card:focus-visible .score-tooltip {
+    display: block;
   }
 
   .card-title {

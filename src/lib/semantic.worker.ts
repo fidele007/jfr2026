@@ -1,37 +1,59 @@
 import { pipeline, env } from '@huggingface/transformers';
+import { createLexicalIndex, scoreSessions } from './search-scoring.mjs';
 
 env.allowLocalModels = false;
 if (env.backends.onnx.wasm) env.backends.onnx.wasm.numThreads = 1;
+
+type Request = { id: number; query: string; indexUrl: string };
 let resources: Promise<any> | undefined;
-let previousQuery = '';
-let previousVector: number[];
-self.onmessage = async ({ data: { id, query, indexUrl } }) => {
-  try {
-    resources ??= (async () => {
-      const response = await fetch(indexUrl);
-      if (!response.ok) throw new Error('Search index unavailable');
-      const index = await response.json();
-      const extractor = await pipeline('feature-extraction', index.model, { dtype: 'q8', device: 'wasm' });
-      return { index, extractor };
-    })();
-    const { index, extractor } = await resources;
-    if (previousQuery !== query) {
-      const output = await extractor(query, { pooling: 'mean', normalize: true, truncation: true });
-      previousVector = Array.from(output.data) as number[];
-      previousQuery = query;
-    }
-    const scores = index.vectors.map((vector: number[], i: number) => {
-      let dot = 0, norm = 0;
-      for (let j = 0; j < vector.length; j++) {
-        dot += vector[j] * previousVector[j];
-        norm += vector[j] * vector[j];
-      }
-      return [index.ids[i], norm ? dot / Math.sqrt(norm) : 0];
-    });
-    self.postMessage({ id, scores });
-  } catch {
-    resources = undefined;
-    self.postMessage({ id, error: true });
-  }
+let pending: Request | undefined;
+let running = false;
+const cache = new Map<string, number[]>();
+
+// Keep only the latest queued query while a download or inference is in progress.
+self.onmessage = ({ data }: MessageEvent<Request>) => {
+  pending = data;
+  void processQueries();
 };
 
+async function processQueries() {
+  if (running) return;
+  running = true;
+  try {
+    while (pending) {
+      const request = pending;
+      pending = undefined;
+      try {
+        resources ??= (async () => {
+          const response = await fetch(request.indexUrl);
+          if (!response.ok) throw new Error('Search index unavailable');
+          const index = await response.json();
+          if (index.version !== 2) throw new Error('Search index version mismatch');
+          const extractor = await pipeline('feature-extraction', index.model, {
+            revision: index.revision, dtype: 'q8', device: 'wasm'
+          });
+          return { index, extractor, lexical: createLexicalIndex(index.documents) };
+        })();
+        const { index, extractor, lexical } = await resources;
+        if (pending) continue;
+        let vector = cache.get(request.query);
+        if (!vector) {
+          const output = await extractor(index.queryPrefix + request.query, {
+            pooling: 'mean', normalize: true, truncation: true
+          });
+          vector = Array.from(output.data) as number[];
+          cache.set(request.query, vector);
+          if (cache.size > 20) cache.delete(cache.keys().next().value!);
+        }
+        if (pending) continue;
+        const scores = scoreSessions(index, vector, lexical, request.query).map(result => [result.id, result.score]);
+        self.postMessage({ id: request.id, scores });
+      } catch {
+        resources = undefined;
+        if (!pending) self.postMessage({ id: request.id, error: true });
+      }
+    }
+  } finally {
+    running = false;
+  }
+}

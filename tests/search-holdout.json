@@ -1,0 +1,14 @@
+[
+ {"query":"imagerie du genou par ultrasons","relevant":"genou"},
+ {"query":"cancer pulmonaire dépistage","relevant":"cancer du poumon|cancer bronchique|cancers bronchopulmonaires"},
+ {"query":"prendre en charge un bébé secoué","relevant":"Bébé secoué"},
+ {"query":"imagerie des infections respiratoires","relevant":"Infections respiratoires|Aspergillose"},
+ {"query":"anatomie radiologique du coude","relevant":"coude"},
+ {"query":"traitement des nodules thyroïdiens bénins","relevant":"nodules thyroïdiens bénins"},
+ {"query":"apprendre la mammographie","relevant":"Mammographie|sénologique"},
+ {"query":"embolisation des hématomes sous duraux","relevant":"hématomes sous-duraux"},
+ {"query":"responsabilité juridique du radiologue","relevant":"Responsabilité médicolégale|Responsabilité et compte-rendu"},
+ {"query":"IRM du cœur avancée","relevant":"IRM cardiaque avancée"},
+ {"query":"échographie du fœtus et IRM prénatale","relevant":"IRM fœtale|prénatale"},
+ {"query":"traitement focal du cancer prostatique","relevant":"Cancer localisé de prostate"}
+]

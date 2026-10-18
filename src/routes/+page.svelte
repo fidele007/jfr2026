@@ -10,27 +10,36 @@
 	import SemanticWorker from '$lib/semantic.worker?worker';
 
 	let semanticStatus = '';
+	let semanticMatches = new Map<string, number>();
+	let semanticPending = false;
 	let semanticWorker: Worker | undefined;
 	let searchVersion = 0;
 	let latestSearch: { id: number; value: string } | undefined;
 
 	const applySemanticSearch = (value: string, id: number) => {
+		semanticPending = true;
 		semanticStatus = 'Recherche par sens… Premier chargement du modèle si nécessaire.';
 		if (!semanticWorker) {
 			semanticWorker = new SemanticWorker();
 			semanticWorker.onmessage = ({ data }) => {
 				if (data.id !== searchVersion || !latestSearch) return;
+				semanticPending = false;
 				if (data.error) {
 					semanticStatus = 'Recherche par sens indisponible. Résultats par mots-clés.';
 					return;
 				}
 				const scoped = sessionsByDate[selectedDate] ?? sessionsByDate[''];
+				semanticMatches = new Map<string, number>(data.scores.filter(([id]: [string, number]) => {
+					const session = scoped.find((item: any) => item.id === id);
+					return session && !eventContainString(session, latestSearch!.value);
+				}));
 				filteredSessions = rankSessions(scoped.filter((x: any) => !onlyVideos || x.picture), new Map(data.scores), (x: any) => eventContainString(x, latestSearch!.value));
 				if (sortAlphabetically) filteredSessions = filteredSessions.toSorted((a: any, b: any) => a.title.localeCompare(b.title));
 				displaySessions = filteredSessions.slice(0, FETCH_LIMIT);
 				semanticStatus = 'Résultats par mots-clés et par sens';
 			};
 			semanticWorker.onerror = () => {
+				semanticPending = false;
 				semanticStatus = 'Recherche par sens indisponible. Résultats par mots-clés.';
 				semanticWorker?.terminate();
 				semanticWorker = undefined;
@@ -86,6 +95,8 @@
 		const version = ++searchVersion;
 		value = value.trim();
 		semanticStatus = '';
+		semanticMatches = new Map();
+		semanticPending = false;
 		loading = true;
 
 		const scopedSessions = sessionsByDate[selectedDate] ?? sessionsByDate[''];
@@ -121,6 +132,8 @@
 	const onSearch = async () => {
 		searchVersion++;
 		semanticStatus = '';
+		semanticMatches = new Map();
+		semanticPending = false;
 		showClearSearch = searchInput.value?.length > 0;
 		loading = true;
 		debounce(searchSessions).call(null, searchInput.value);
@@ -362,7 +375,7 @@
 </header>
 
 <main>
-	{#if loading}
+	{#if loading || (semanticPending && !filteredSessions?.length)}
 		<div class="DNA_cont" aria-label="Chargement" role="status">
 			<div class="nucleobase"></div>
 			<div class="nucleobase"></div>
@@ -378,14 +391,14 @@
 	{/if}
 
 	<div class="card-container">
-		{#if !loading && filteredSessions}
+		{#if !loading && filteredSessions && (!semanticPending || filteredSessions.length > 0)}
 			<p class="result-count" aria-live="polite">
 				{filteredSessions.length}
 				{filteredSessions.length > 1 ? 'sessions' : 'session'}
 			</p>
 			{#if displaySessions && displaySessions.length > 0}
 				{#each displaySessions as item (item.id)}
-					<SessionCard info={item} />
+					<SessionCard info={item} semanticScore={semanticMatches.get(item.id)} />
 				{/each}
 			{:else}
 				<div class="empty-state">
