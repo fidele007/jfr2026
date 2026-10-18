@@ -5,7 +5,7 @@
     "": {
       "name": "jfr2026",
       "dependencies": {
-        "@huggingface/transformers": "^4.3.1",
+        "@huggingface/transformers": "4.3.1",
       },
       "devDependencies": {
         "@sveltejs/adapter-auto": "^6.1.1",

@@ -115,3 +115,25 @@ regression test also checks index integrity and rejects three unrelated queries.
 Known weak queries remain: paraphrases about radiation exposure, leg veins, and
 testicular pain. Further tuning should use new examples and user feedback rather
 than loosening the relevance checks for those cases.
+
+### Browser embedding runtime
+
+The worker imports only the BERT encoder, tokenizer, and pooling utilities through
+`src/lib/embedding-runtime.mjs`. The generic Transformers.js entry initializes
+unused model registries; a Mistral registry entry in the minified worker triggered
+GitHub push protection during branch deployment. The smaller entry removes that
+unused registry rather than bypassing push protection.
+
+Transformers.js is pinned to 4.3.1 because this entry uses its internal source
+paths. Vite supplies browser-only stubs for the source modules' Node imports.
+After upgrading the library, verify the paths, rebuild, run the parity check,
+and smoke-test the production worker in a browser:
+
+```sh
+bun run build
+node scripts/test-embedding-runtime.mjs
+```
+
+The parity check compares embeddings against the public feature-extraction
+pipeline and checks that the unused Mistral model registry is absent from the
+production bundle.

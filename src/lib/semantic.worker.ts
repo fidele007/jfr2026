@@ -1,4 +1,4 @@
-import { pipeline, env } from '@huggingface/transformers';
+import { createEmbeddingExtractor, env } from './embedding-runtime.mjs';
 import { createLexicalIndex, scoreSessions } from './search-scoring.mjs';
 
 env.allowLocalModels = false;
@@ -29,18 +29,14 @@ async function processQueries() {
           if (!response.ok) throw new Error('Search index unavailable');
           const index = await response.json();
           if (index.version !== 2) throw new Error('Search index version mismatch');
-          const extractor = await pipeline('feature-extraction', index.model, {
-            revision: index.revision, dtype: 'q8', device: 'wasm'
-          });
+          const extractor = await createEmbeddingExtractor(index.model, index.revision);
           return { index, extractor, lexical: createLexicalIndex(index.documents) };
         })();
         const { index, extractor, lexical } = await resources;
         if (pending) continue;
         let vector = cache.get(request.query);
         if (!vector) {
-          const output = await extractor(index.queryPrefix + request.query, {
-            pooling: 'mean', normalize: true, truncation: true
-          });
+          const output = await extractor(index.queryPrefix + request.query);
           vector = Array.from(output.data) as number[];
           cache.set(request.query, vector);
           if (cache.size > 20) cache.delete(cache.keys().next().value!);
