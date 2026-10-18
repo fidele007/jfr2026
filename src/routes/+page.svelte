@@ -6,6 +6,39 @@
 	import BackToTop from '$lib/BackToTop.svelte';
 	import MediaHistoryButton from '$lib/MediaHistoryButton.svelte';
 	import SessionCard from '$lib/SessionCard.svelte';
+	import { rankSessions } from '$lib/semantic';
+	import SemanticWorker from '$lib/semantic.worker?worker';
+
+	let semanticStatus = '';
+	let semanticWorker: Worker | undefined;
+	let searchVersion = 0;
+	let latestSearch: { id: number; value: string } | undefined;
+
+	const applySemanticSearch = (value: string, id: number) => {
+		semanticStatus = 'Recherche par sens… Premier chargement du modèle si nécessaire.';
+		if (!semanticWorker) {
+			semanticWorker = new SemanticWorker();
+			semanticWorker.onmessage = ({ data }) => {
+				if (data.id !== searchVersion || !latestSearch) return;
+				if (data.error) {
+					semanticStatus = 'Recherche par sens indisponible. Résultats par mots-clés.';
+					return;
+				}
+				const scoped = sessionsByDate[selectedDate] ?? sessionsByDate[''];
+				filteredSessions = rankSessions(scoped.filter((x: any) => !onlyVideos || x.picture), new Map(data.scores), (x: any) => eventContainString(x, latestSearch!.value));
+				if (sortAlphabetically) filteredSessions = filteredSessions.toSorted((a: any, b: any) => a.title.localeCompare(b.title));
+				displaySessions = filteredSessions.slice(0, FETCH_LIMIT);
+				semanticStatus = 'Résultats par mots-clés et par sens';
+			};
+			semanticWorker.onerror = () => {
+				semanticStatus = 'Recherche par sens indisponible. Résultats par mots-clés.';
+				semanticWorker?.terminate();
+				semanticWorker = undefined;
+			};
+		}
+		latestSearch = { id, value };
+		semanticWorker.postMessage({ id, query: value, indexUrl: `${base}/search/index.json` });
+	};
 
 	let searchInput: HTMLInputElement;
 
@@ -50,6 +83,9 @@
 	};
 
 	const searchSessions = async (value: string) => {
+		const version = ++searchVersion;
+		value = value.trim();
+		semanticStatus = '';
 		loading = true;
 
 		const scopedSessions = sessionsByDate[selectedDate] ?? sessionsByDate[''];
@@ -72,6 +108,7 @@
 		displaySessions = filteredSessions.slice(0, FETCH_LIMIT);
 
 		loading = false;
+		if (value) applySemanticSearch(value, version);
 
 		$filterOptions = {
 			filterKeyword: searchInput.value,
@@ -82,6 +119,8 @@
 	};
 
 	const onSearch = async () => {
+		searchVersion++;
+		semanticStatus = '';
 		showClearSearch = searchInput.value?.length > 0;
 		loading = true;
 		debounce(searchSessions).call(null, searchInput.value);
@@ -172,6 +211,8 @@
 	});
 
 	onDestroy(() => {
+		clearTimeout(timeout);
+		semanticWorker?.terminate();
 		if (typeof document !== 'undefined') {
 			document.removeEventListener('scroll', onScroll);
 		}
@@ -294,6 +335,7 @@
 			</div>
 		</div>
 
+		{#if semanticStatus}<p class="semantic-status" role="status">{semanticStatus}</p>{/if}
 		<nav class="date-nav" aria-label="Filtrer par jour">
 			<ul class="menu">
 				{#each Object.keys(sessionsByDate) as date}
@@ -361,6 +403,7 @@
 </main>
 
 <style>
+	.semantic-status { margin: 0.3rem 0; font-size: 0.85rem; color: var(--text-secondary, #666); }
 	#top-header {
 		border-bottom: 1px solid var(--border);
 		box-shadow: 0 6px 12px -10px rgb(0 0 0 / 50%);

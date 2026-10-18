@@ -61,3 +61,28 @@ The workflow uses the built-in `GITHUB_TOKEN`; no additional secret is needed.
 The local `bun run deploy` command remains available. While the Pages source is
 set to GitHub Actions, local pushes to `gh-pages` do not publish the live site;
 switch the source back to **Deploy from a branch** to use local publishing.
+
+## Semantic search
+
+Search automatically combines keyword matches with semantic matches for non-empty
+queries. Keyword results appear first; the browser worker updates them after
+embedding the query. Date/video filters and alphabetical sorting still apply.
+If model loading fails, keyword search remains available.
+
+The quantized multilingual MiniLM model runs locally in a Web Worker using
+Transformers.js. Its first use downloads approximately 118 MB of model weights
+from Hugging Face, plus the tokenizer and WASM runtime. The browser caches model
+files for subsequent searches. Queries are processed locally, without an API key.
+The session vector index is approximately 638 KB uncompressed.
+
+After changing `static/json/event.json`, regenerate and verify the committed index:
+
+```sh
+bun run search:index
+node scripts/test-search.mjs
+```
+
+Index generation uses Node.js and caches its model under `.cache/transformers/`.
+The same quantized model and mean pooling are used for indexing and queries.
+The retrieval smoke test checks index integrity and representative French queries;
+relevance thresholds may need tuning for further real-world queries.
