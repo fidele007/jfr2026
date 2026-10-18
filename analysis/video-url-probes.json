@@ -1,0 +1,83 @@
+[
+  {
+    "video": "500",
+    "mode": "unsigned",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/366267490",
+    "mp4_header": true,
+    "bytes_read": 64
+  },
+  {
+    "video": "500",
+    "mode": "signed",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/366267490",
+    "mp4_header": true,
+    "bytes_read": 64
+  },
+  {
+    "video": "522",
+    "mode": "unsigned",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/488377626",
+    "mp4_header": true,
+    "bytes_read": 64
+  },
+  {
+    "video": "522",
+    "mode": "signed",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/488377626",
+    "mp4_header": true,
+    "bytes_read": 64
+  },
+  {
+    "video": "950",
+    "mode": "unsigned",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/317397467",
+    "mp4_header": true,
+    "bytes_read": 64
+  },
+  {
+    "video": "951",
+    "mode": "unsigned",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/529279407",
+    "mp4_header": true,
+    "bytes_read": 64
+  },
+  {
+    "video": "952",
+    "mode": "unsigned",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/547086302",
+    "mp4_header": true,
+    "bytes_read": 64
+  },
+  {
+    "video": "1023",
+    "mode": "unsigned",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/399148126",
+    "mp4_header": true,
+    "bytes_read": 64
+  },
+  {
+    "video": "1023",
+    "mode": "signed",
+    "status": 206,
+    "type": "video/mp4",
+    "range": "bytes 0-63/399148126",
+    "mp4_header": true,
+    "bytes_read": 64
+  }
+]
