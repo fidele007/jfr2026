@@ -1,266 +1,252 @@
 <script lang="ts">
-  import { base } from "$app/paths";
-  import { getFriendlyDate, getTimeEmoji } from "./Constants.svelte";
+	import { base } from '$app/paths';
+	import { IconUsers, IconPlayerPlayFilled } from '@tabler/icons-svelte';
+	import SessionMeta from './SessionMeta.svelte';
+	import { speakerSummary } from './media-ui';
 
-  export let info: any;
-  export let semanticScore: number | undefined = undefined;
+	export let info: any;
+	export let semanticScore: number | undefined = undefined;
 
-  $: hasSemanticMatch = semanticScore !== undefined && Number.isFinite(semanticScore);
-  // Conservative display tier for the current E5 hybrid scores, not a confidence estimate.
-  $: matchLabel = semanticScore !== undefined && semanticScore >= 0.92 ? 'Très pertinent' : 'Sujet proche';
-  $: scoreDescription = hasSemanticMatch
-    ? `Score de classement : ${semanticScore!.toLocaleString('fr-FR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}. Combine proximité de sens et mots-clés ; ce n'est pas un pourcentage de confiance.`
-    : '';
+	$: hasSemanticMatch = semanticScore !== undefined && Number.isFinite(semanticScore);
+	// Conservative display tier for the current E5 hybrid scores, not a confidence estimate.
+	$: matchLabel =
+		semanticScore !== undefined && semanticScore >= 0.92 ? 'Très pertinent' : 'Sujet proche';
+	$: scoreDescription = hasSemanticMatch
+		? `Score de classement : ${semanticScore!.toLocaleString('fr-FR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}. Combine proximité de sens et mots-clés ; ce n'est pas un pourcentage de confiance.`
+		: '';
 
-  const membersOf = (roleName: string) =>
-    info.outerRoles
-      ?.find((role: any) => role.name === roleName)
-      ?.members.items.map((item: any) => `${item.firstName} ${item.lastName}`)
-      .join(", ");
-
-  $: responsables = membersOf("responsable");
-  $: moderators = membersOf("modérateur");
-  $: speakers = membersOf("speaker");
-  $: organizers = info.organizers?.map((item: any) => item.name).join(", ");
-  $: tags = info.tracks?.map((track: any) => track.label) as string[] | undefined;
-
-  $: startTime = info.start.split("T")[1].split("+")[0];
-  $: endTime = info.end.split("T")[1].split("+")[0];
-  $: typeColor = info.sessionTypeColor !== "#000000" ? info.sessionTypeColor : "var(--text-muted)";
+	$: speakers = info.outerRoles?.find((role: any) => role.name === 'speaker')?.members.items ?? [];
+	$: summary = speakerSummary(speakers);
+	$: tags = info.tracks?.map((track: any) => track.label) as string[] | undefined;
+	let failedImage: string | undefined;
+	$: typeColor = info.sessionTypeColor !== '#000000' ? info.sessionTypeColor : 'var(--text-muted)';
 </script>
 
-<a class="card" href="{base}/session?id={info.id}" style="--type-color: {typeColor}"
-  aria-describedby={hasSemanticMatch ? `match-score-${info.id}` : undefined}>
-  <div class="card-info">
-    <div class="card-type">{info.sessionType}</div>
-    {#if hasSemanticMatch}
-      <span class="semantic-match">
-        {matchLabel}
-        <span class="score-tooltip" role="tooltip" id="match-score-{info.id}">{scoreDescription}</span>
-      </span>
-    {/if}
-    <h2 class="card-title">{info.title}</h2>
-    <div class="date-time subtitle">
-      <span>🗓️ {getFriendlyDate(info.start.split("T")[0])}</span>
-      <span>{getTimeEmoji(startTime)} {startTime} – {endTime}</span>
-    </div>
-    <dl class="participants">
-      {#if responsables}
-        <div><dt>Responsable</dt><dd>{responsables}</dd></div>
-      {/if}
-      {#if moderators}
-        <div><dt>Modérateur</dt><dd>{moderators}</dd></div>
-      {/if}
-      {#if speakers}
-        <div><dt>Orateurs</dt><dd>{speakers}</dd></div>
-      {/if}
-      {#if organizers}
-        <div><dt>Organisateur</dt><dd>{organizers}</dd></div>
-      {/if}
-    </dl>
-    {#if tags && tags.length > 0}
-      <div class="tag-list">
-        {#each tags as tag}
-          <span class="tag-name">{tag}</span>
-        {/each}
-      </div>
-    {/if}
-  </div>
-  {#if info.picture}
-    <div class="thumbnail-container">
-      <img src={info.picture} alt="" class="thumbnail" loading="lazy" decoding="async" />
-      <span class="play-badge" aria-hidden="true">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z" /></svg>
-      </span>
-      <span class="visually-hidden">Vidéos disponibles</span>
-    </div>
-  {/if}
+<a
+	class="card"
+	href="{base}/session?id={info.id}"
+	style="--type-color: {typeColor}"
+	aria-labelledby={`session-title-${info.id}`}
+	aria-describedby={hasSemanticMatch ? `match-score-${info.id}` : undefined}
+>
+	<div class="card-heading">
+		<div class="card-type">{info.sessionType}</div>
+		{#if hasSemanticMatch}
+			<span class="semantic-match">
+				{matchLabel}
+				<span class="score-tooltip" role="tooltip" id="match-score-{info.id}"
+					>{scoreDescription}</span
+				>
+			</span>
+		{/if}
+		<h2 class="card-title" id="session-title-{info.id}">{info.title}</h2>
+	</div>
+	<div class="card-details">
+		<SessionMeta start={info.start} end={info.end} />
+		{#if summary}<p class="speaker-summary">
+				<IconUsers size={16} aria-hidden="true" /><span>{summary}</span>
+			</p>{/if}
+		{#if tags && tags.length > 0}
+			<div class="tag-list">
+				{#each tags as tag}
+					<span class="tag-name">{tag}</span>
+				{/each}
+			</div>
+		{/if}
+	</div>
+	{#if info.picture && failedImage !== info.picture}
+		<div class="thumbnail-container">
+			<img
+				src={info.picture}
+				alt=""
+				class="thumbnail"
+				loading="lazy"
+				decoding="async"
+				on:error={() => (failedImage = info.picture)}
+			/>
+			<span class="play-badge" aria-hidden="true">
+				<IconPlayerPlayFilled size={14} />
+			</span>
+			<span class="visually-hidden">Vidéos disponibles</span>
+		</div>
+	{/if}
 </a>
 
 <style>
-  .card {
-    display: flex;
-    gap: 16px;
-    padding: 14px 16px 14px 18px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    border-left: 5px solid var(--type-color);
-    background-color: var(--surface);
-    box-shadow: var(--shadow);
-    color: inherit;
-    font-weight: normal;
-    text-align: left;
-    transition:
-      background-color 0.15s ease,
-      border-color 0.15s ease,
-      transform 0.15s ease;
-  }
-
-  .card:hover {
-    background-color: var(--surface-hover);
-    border-color: var(--text-muted);
-    border-left-color: var(--type-color);
-    transform: translateY(-1px);
-  }
-
-  .card-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .card-type {
-    color: var(--type-color);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-  }
-
-  .semantic-match {
-    position: relative;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    border-bottom: 1px dotted currentColor;
-    cursor: help;
-  }
-
-  .score-tooltip {
-    display: none;
-    position: absolute;
-    z-index: 2;
-    top: calc(100% + 6px);
-    left: 0;
-    width: min(280px, 65vw);
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: var(--shadow);
-    font-size: 0.75rem;
-    line-height: 1.5;
-    font-weight: normal;
-  }
-
-  .semantic-match:hover .score-tooltip,
-  .card:focus-visible .score-tooltip {
-    display: block;
-  }
-
-  .card-title {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 700;
-    line-height: 1.3;
-  }
-
-  .card:hover .card-title {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-  }
-
-  .participants {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    margin: 4px 0 0;
-    font-size: 0.875rem;
-  }
-
-  .participants div {
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: 6px;
-    align-items: baseline;
-  }
-
-  .participants dt {
-    color: var(--text-muted);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-  }
-
-  .participants dd {
-    margin: 0;
-    font-weight: 600;
-  }
-
-  .tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 6px;
-  }
-
-  .tag-name {
-    background-color: rgb(35 184 42 / 12%);
-    border-radius: 50px;
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 2px 10px;
-  }
-
-  .thumbnail-container {
-    position: relative;
-    flex: 0 0 auto;
-    align-self: center;
-    width: 280px;
-    aspect-ratio: 16 / 9;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background-color: var(--surface-sunken);
-    border: 1px solid var(--border);
-  }
-
-  .thumbnail {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .play-badge {
-    position: absolute;
-    right: 6px;
-    bottom: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background-color: rgb(0 0 0 / 65%);
-    color: #fff;
-  }
-
-  @media (max-width: 900px) {
-    .thumbnail-container {
-      width: 200px;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .card {
-      flex-direction: column-reverse;
-      gap: 10px;
-      padding: 12px 12px 12px 14px;
-    }
-
-    .thumbnail-container {
-      width: 100%;
-      align-self: stretch;
-    }
-
-    .card-title {
-      font-size: 1rem;
-    }
-  }
+	.card {
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 200px;
+		align-items: center;
+		column-gap: 20px;
+		row-gap: 10px;
+		padding: 22px 24px;
+		color: inherit;
+		font-weight: normal;
+		background: var(--surface);
+		border-bottom: 1px solid var(--border);
+	}
+	.card:last-child {
+		border-bottom: 0;
+	}
+	.card:hover {
+		background: var(--surface-hover);
+	}
+	.card:focus-visible {
+		outline-offset: -3px;
+		z-index: 1;
+	}
+	.card-heading,
+	.card-details {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+		min-width: 0;
+	}
+	.card-type {
+		padding-left: 12px;
+		border-left: 3px solid var(--type-color);
+		color: var(--link);
+		font-size: 0.75rem;
+		font-weight: 700;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
+	}
+	.card-title {
+		margin: 0 0 4px;
+		font-size: 1.15rem;
+		font-weight: 700;
+		line-height: 1.3;
+		overflow-wrap: anywhere;
+	}
+	.speaker-summary {
+		display: flex;
+		align-items: baseline;
+		gap: 6px;
+		margin: 0;
+		color: var(--text-muted);
+		font-size: 0.9rem;
+		line-height: 1.4;
+	}
+	.speaker-summary :global(svg) {
+		flex: 0 0 16px;
+		align-self: flex-start;
+		margin-top: 2px;
+	}
+	.tag-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+	.tag-name {
+		background: rgb(35 184 42 / 10%);
+		color: var(--text-muted);
+		border-radius: 20px;
+		padding: 2px 8px;
+		font-size: 0.75rem;
+	}
+	.thumbnail-container {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+		position: relative;
+		width: 200px;
+		aspect-ratio: 16 / 9;
+		border-radius: 4px;
+		overflow: hidden;
+		background: var(--surface-sunken);
+	}
+	.thumbnail {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.card:not(:has(.thumbnail-container)) {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.play-badge {
+		position: absolute;
+		right: 4px;
+		bottom: 4px;
+		display: grid;
+		place-items: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: rgb(0 0 0 / 65%);
+		color: white;
+	}
+	.semantic-match {
+		position: relative;
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		border-bottom: 1px dotted currentColor;
+	}
+	.score-tooltip {
+		display: none;
+		position: absolute;
+		z-index: 2;
+		top: calc(100% + 6px);
+		left: 0;
+		width: min(280px, 65vw);
+		padding: 8px 10px;
+		background: var(--surface);
+		color: var(--text);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		font-size: 0.75rem;
+		line-height: 1.5;
+	}
+	.semantic-match:hover .score-tooltip,
+	.card:focus-visible .score-tooltip {
+		display: block;
+	}
+	@media (max-width: 720px) {
+		.card {
+			display: flex;
+			flex-wrap: wrap;
+			grid-template-columns: minmax(0, 1fr) 144px;
+			gap: 12px;
+			padding: 18px 14px;
+		}
+		.card-heading {
+			flex: 1 1 100%;
+			grid-column: 1 / -1;
+			gap: 7px;
+		}
+		.card-details {
+			flex: 1 1 7rem;
+			overflow-wrap: anywhere;
+			grid-column: 1;
+			gap: 7px;
+		}
+		.card-title {
+			font-size: 1rem;
+			line-height: 1.3;
+		}
+		.card-type {
+			font-size: 0.7rem;
+			padding-left: 8px;
+		}
+		.thumbnail-container {
+			flex: 0 0 144px;
+			grid-row: 2;
+			width: 144px;
+		}
+		.speaker-summary {
+			font-size: 0.85rem;
+		}
+	}
+	@media (max-width: 350px) {
+		.card {
+			gap: 10px;
+			padding: 16px 12px;
+			grid-template-columns: minmax(0, 1fr) 128px;
+		}
+		.thumbnail-container {
+			flex-basis: 128px;
+			width: 128px;
+		}
+	}
 </style>

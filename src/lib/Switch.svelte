@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let checked = false;
-	export const color = 'var(--accent)';
+	export const color = 'var(--highlight)';
 </script>
 
 <label class="switch-container" title="Enchaîner automatiquement la vidéo suivante">
@@ -16,6 +16,7 @@
 		display: flex;
 		gap: 8px;
 		align-items: center;
+		min-height: 44px;
 		font-weight: 600;
 		font-size: 0.85rem;
 		cursor: pointer;
@@ -33,7 +34,8 @@
 		position: absolute;
 		opacity: 0;
 		width: 100%;
-		height: 100%;
+		height: 44px;
+		top: -11px;
 		margin: 0;
 		cursor: pointer;
 	}
@@ -64,7 +66,7 @@
 	}
 
 	input:focus-visible + .slider {
-		outline: 2px solid var(--highlight);
+		outline: 2px solid var(--link);
 		outline-offset: 2px;
 	}
 

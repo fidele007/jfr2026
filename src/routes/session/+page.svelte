@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { browser } from '$app/environment';
-	import { getFriendlyDate, getTimeEmoji } from '$lib/Constants.svelte';
+	import SessionMeta from '$lib/SessionMeta.svelte';
+	import {
+		PLAYLIST_PREVIEW_LIMIT,
+		playlistNeedsExpansion,
+		playbackLabels,
+		youtubePlaybackState,
+		type PlaybackState
+	} from '$lib/media-ui';
 	import { mediaHistory, prefs } from '../../stores';
 	import { onDestroy, onMount, tick } from 'svelte';
 	import { page } from '$app/stores';
@@ -38,6 +45,16 @@
 	let currentMedia: any;
 	let previousMedia: any;
 	let autoplay: boolean = $prefs?.autoplay ?? false;
+	let playbackState: PlaybackState = 'selected';
+	let playlistExpanded = false;
+	let compactPlaylist = false;
+	let expansionMedia: any;
+	$: if (currentMedia !== expansionMedia) {
+		expansionMedia = currentMedia;
+		if (playlistNeedsExpansion(mediaList, currentMedia)) playlistExpanded = true;
+	}
+	$: visibleMedia =
+		compactPlaylist && !playlistExpanded ? mediaList.slice(0, PLAYLIST_PREVIEW_LIMIT) : mediaList;
 
 	let mediaList: {
 		youtubeId?: string;
@@ -89,6 +106,7 @@
 				onStateChange: onPlayerStateChange,
 				onError: () => {
 					// Deleted, private, or embedding-disabled videos use the original sources.
+					playbackState = 'selected';
 					currentMedia.youtubeId = undefined;
 					previousMedia = null;
 					currentMedia = currentMedia;
@@ -96,6 +114,16 @@
 			}
 		});
 	};
+
+	onMount(() => {
+		const query = window.matchMedia('(max-width: 1000px)');
+		const update = () => {
+			compactPlaylist = query.matches;
+		};
+		update();
+		query.addEventListener('change', update);
+		return () => query.removeEventListener('change', update);
+	});
 
 	onMount(async () => {
 		try {
@@ -144,7 +172,7 @@
 				id: eventDetail.vod.media.id,
 				title: eventDetail.vod.media.title ?? '[Sans titre]',
 				hdUrl: eventDetail.vod.media.element.sources[0].uri,
-					youtubeId: getYoutubeId(videoMapping, eventDetail.vod.media.element.sources[0].uri),
+				youtubeId: getYoutubeId(videoMapping, eventDetail.vod.media.element.sources[0].uri),
 				url: eventDetail.vod.media.element.sources[1]?.uri,
 				thumbnail: eventDetail.vod.media.thumbnail,
 				start: eventDetail.start.split('T')[1].split('+')[0],
@@ -156,8 +184,12 @@
 
 		if (mediaList.length > 0) {
 			if (selectedMediaUrl) {
-				currentMedia = mediaList.find((item) => item.hdUrl === selectedMediaUrl ||
-					(item.youtubeId && `https://www.youtube.com/embed/${item.youtubeId}` === selectedMediaUrl));
+				currentMedia = mediaList.find(
+					(item) =>
+						item.hdUrl === selectedMediaUrl ||
+						(item.youtubeId &&
+							`https://www.youtube.com/embed/${item.youtubeId}` === selectedMediaUrl)
+				);
 			}
 
 			if (!currentMedia) {
@@ -166,7 +198,6 @@
 		}
 
 		loading = false;
-
 	});
 
 	onDestroy(() => {
@@ -179,6 +210,7 @@
 	});
 
 	const onPlayerStateChange = (event: any) => {
+		playbackState = youtubePlaybackState(event.data);
 		if (event.data === YT.PlayerState.PLAYING) {
 			onMediaPlay(currentMedia);
 		} else if (event.data === YT.PlayerState.ENDED) {
@@ -190,6 +222,7 @@
 		if (!media || media === previousMedia) {
 			return;
 		}
+		playbackState = 'selected';
 		const shouldPlay = Boolean(previousMedia) || autoplay;
 		previousMedia = media;
 
@@ -222,11 +255,19 @@
 		}
 
 		if (window.matchMedia('(max-width: 1000px)').matches) {
-			document.getElementById('video-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			document
+				.getElementById('video-container')
+				?.scrollIntoView({
+					behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+						? 'instant'
+						: 'smooth',
+					block: 'start'
+				});
 		}
 	};
 
 	const onMediaPlay = (media: any) => {
+		playbackState = 'playing';
 		const filteredArray = $mediaHistory.filter((item: any) => item.hdUrl !== media.hdUrl);
 
 		const historyMedia = structuredClone(media);
@@ -239,6 +280,7 @@
 	};
 
 	const onMediaEnded = (media: any) => {
+		playbackState = 'ended';
 		if (!$prefs.autoplay) {
 			return;
 		}
@@ -249,10 +291,8 @@
 		}
 	};
 
-	const toTime = (iso: string) => iso?.split('T')[1].split('+')[0];
-
 	$: if ($prefs) $prefs = { autoplay: autoplay };
-	$: currentMedia, playMedia(currentMedia);
+	$: (currentMedia, playMedia(currentMedia));
 	$: typeColor =
 		eventDetail && eventDetail.sessionTypeColor !== '#000000'
 			? eventDetail.sessionTypeColor
@@ -267,7 +307,13 @@
 	<div class="topbar-inner">
 		<a href="{base}/" class="btn back-link">
 			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-				<path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+				<path
+					d="M15 6L9 12L15 18"
+					stroke="currentColor"
+					stroke-width="2.2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
 			</svg>
 			<span>Sessions</span>
 		</a>
@@ -319,7 +365,12 @@
 								class="video-player"
 								src={getBestMediaSource(currentMedia)}
 								poster={currentMedia.thumbnail}
-								on:play={() => onMediaPlay(currentMedia)}
+								on:playing={() => onMediaPlay(currentMedia)}
+								on:pause={() => {
+									if (playbackState !== 'ended') playbackState = 'paused';
+								}}
+								on:emptied={() => (playbackState = 'selected')}
+								on:error={() => (playbackState = 'selected')}
 								on:ended={() => onMediaEnded(currentMedia)}
 							>
 								<track kind="captions" />
@@ -327,7 +378,7 @@
 						{/if}
 					</div>
 					<div id="current-media-info">
-						<div class="now-playing">En cours de lecture</div>
+						<div class="now-playing" role="status">{playbackLabels[playbackState]}</div>
 						<h2>{currentMedia.title ?? '😶‍🌫️'}</h2>
 						{#if currentMedia.speakers}
 							<Speakers speakers={currentMedia.speakers} />
@@ -340,11 +391,22 @@
 						<strong>Liste de lecture <span class="count">{mediaList.length}</span></strong>
 						<Switch bind:checked={autoplay} />
 					</div>
-					<div class="playlist">
-						{#each mediaList as item}
-							<MediaCard media={item} downloadable={true} bind:currentMedia />
+					<div class="playlist" id="session-playlist">
+						{#each visibleMedia as item}
+							<MediaCard media={item} downloadable={true} bind:currentMedia {playbackState} />
 						{/each}
 					</div>
+					{#if compactPlaylist && mediaList.length > PLAYLIST_PREVIEW_LIMIT}
+						<button
+							type="button"
+							class="btn playlist-toggle"
+							aria-expanded={playlistExpanded}
+							aria-controls="session-playlist"
+							on:click={() => (playlistExpanded = !playlistExpanded)}
+						>
+							{playlistExpanded ? 'Réduire la liste' : `Afficher les ${mediaList.length} vidéos`}
+						</button>
+					{/if}
 				</aside>
 			{/if}
 
@@ -352,13 +414,7 @@
 				<div class="session-header">
 					<div class="session-type">{eventDetail.sessionType}</div>
 					<h1>{eventDetail.title}</h1>
-					<div class="date-time subtitle">
-						<span>🗓️ {getFriendlyDate(eventDetail.start?.split('T')[0])}</span>
-						<span>
-							{getTimeEmoji(toTime(eventDetail.start))}
-							{toTime(eventDetail.start)} – {toTime(eventDetail.end)}
-						</span>
-					</div>
+					<SessionMeta start={eventDetail.start} end={eventDetail.end} />
 				</div>
 				{#if mediaList.length == 0}
 					<p class="no-media-note">Aucune vidéo n'est disponible pour cette session.</p>
@@ -371,9 +427,21 @@
 						</div>
 					</div>
 				{/if}
-				{#if moderators || responsables}
+				{#if moderators?.length || responsables?.length || eventDetail.speakers?.items?.length || eventDetail.organizers?.length}
 					<dl class="person-list">
-						{#if moderators}
+						{#if eventDetail.speakers?.items?.length}
+							<div>
+								<dt>Orateurs</dt>
+								<dd><Speakers speakers={eventDetail.speakers.items} /></dd>
+							</div>
+						{/if}
+						{#if eventDetail.organizers?.length}
+							<div>
+								<dt>Organisateur</dt>
+								<dd>{eventDetail.organizers.map((item: any) => item.name).join(', ')}</dd>
+							</div>
+						{/if}
+						{#if moderators?.length}
 							<div>
 								<dt>Modérateur</dt>
 								<dd>
@@ -383,7 +451,7 @@
 								</dd>
 							</div>
 						{/if}
-						{#if responsables}
+						{#if responsables?.length}
 							<div>
 								<dt>Responsable</dt>
 								<dd>
@@ -531,6 +599,10 @@
 		text-align: center;
 	}
 
+	.playlist-toggle {
+		margin: 8px 12px 12px;
+	}
+
 	.playlist {
 		display: flex;
 		flex-direction: column;
@@ -553,7 +625,7 @@
 	}
 
 	.session-type {
-		color: var(--type-color);
+		color: var(--link);
 		font-size: 0.75rem;
 		font-weight: 700;
 		letter-spacing: 0.02em;
@@ -690,8 +762,14 @@
 
 		.playlist-container {
 			position: static;
-			max-height: 420px;
+			max-height: none;
+			overflow: visible;
 			margin: 0 12px;
+		}
+
+		.playlist {
+			overflow: visible;
+			overscroll-behavior: auto;
 		}
 
 		.detail {

@@ -2,7 +2,10 @@
 	export let showOnPx = 150;
 	let hidden = true;
 	function goTop() {
-		window.scrollTo({ top: 0, behavior: 'smooth' });
+		window.scrollTo({
+			top: 0,
+			behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
+		});
 	}
 	function scrollContainer() {
 		return document.documentElement || document.body;
@@ -29,7 +32,14 @@
 	class:hidden
 	tabindex={hidden ? -1 : 0}
 >
-	<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+	<svg
+		width="24"
+		height="24"
+		viewBox="0 0 24 24"
+		fill="none"
+		aria-hidden="true"
+		xmlns="http://www.w3.org/2000/svg"
+	>
 		<path
 			d="M17 15L12 10L7 15"
 			stroke="currentColor"

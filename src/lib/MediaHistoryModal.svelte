@@ -6,13 +6,18 @@
 	export let showModal: boolean;
 
 	let dialog: HTMLDialogElement;
+	let returnFocus: HTMLElement | null = null;
 
 	$: {
-		if (showModal) dialog.showModal();
+		if (showModal && dialog && !dialog.open) {
+			returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+			dialog.showModal();
+		}
 	}
 
 	const onClickMedia = (media: any) => {
-		window.location.assign(`${base}/session?id=${media.sessionId}&media-url=${media.hdUrl}`);
+		const params = new URLSearchParams({ id: media.sessionId, 'media-url': media.hdUrl });
+		window.location.assign(`${base}/session?${params}`);
 	};
 
 	const onClearHistory = () => {
@@ -28,7 +33,11 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <dialog
 	bind:this={dialog}
-	on:close={() => (showModal = false)}
+	aria-labelledby="history-title"
+	on:close={() => {
+		showModal = false;
+		returnFocus?.focus();
+	}}
 	on:click={(e) => {
 		if (e.target === dialog) dialog.close();
 	}}
@@ -36,7 +45,7 @@
 	<div id="dialog-container">
 		<div id="dialog-header">
 			<div class="dialog-title">
-				<h2>Historique</h2>
+				<h2 id="history-title">Historique</h2>
 				<button
 					type="button"
 					class="btn-danger"
@@ -127,7 +136,7 @@
 		<hr />
 		<div id="dialog-body">
 			{#if !$mediaHistory || $mediaHistory.length == 0}
-				<div id="placeholder">🙂‍↔️ Vous n'avez pas d'historique.</div>
+				<div id="placeholder">Vous n'avez pas encore regardé de vidéo.</div>
 			{:else}
 				<div class="media-list">
 					{#each $mediaHistory as item}
@@ -144,7 +153,7 @@
 		width: min(640px, calc(100vw - 32px));
 		max-width: none;
 		min-height: 40%;
-		max-height: 85vh;
+		max-height: 85dvh;
 		border-radius: var(--radius);
 		border: 1px solid var(--border);
 		padding: 0;
@@ -183,7 +192,7 @@
 	#dialog-container {
 		display: flex;
 		flex-direction: column;
-		max-height: 85vh;
+		max-height: 85dvh;
 	}
 	#dialog-header {
 		display: flex;
@@ -205,8 +214,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 40px;
-		height: 40px;
+		width: 44px;
+		height: 44px;
 		border: none;
 		border-radius: 50%;
 		cursor: pointer;
@@ -225,7 +234,8 @@
 		margin: 8px 0;
 	}
 	#dialog-body {
-		flex: 0 1 auto;
+		flex: 1 1 auto;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 		overflow-y: auto;
@@ -233,7 +243,6 @@
 	.media-list {
 		display: flex;
 		flex-direction: column;
-		overflow-y: auto;
 	}
 	#placeholder {
 		margin-top: 20px;
@@ -246,11 +255,12 @@
 	@media (max-width: 600px) {
 		dialog {
 			width: 100vw;
-			max-height: 85vh;
+			max-height: 85dvh;
 			margin: auto 0 0;
 			border-radius: var(--radius) var(--radius) 0 0;
 			border-bottom: none;
 			padding-bottom: env(safe-area-inset-bottom);
+			box-sizing: border-box;
 		}
 		dialog > div {
 			padding: 12px;
