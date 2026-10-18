@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { base } from '$app/paths';
-	import { IconClock, IconDownload, IconPlayerPlayFilled } from '@tabler/icons-svelte';
+	import { IconClock, IconDownload } from '@tabler/icons-svelte';
 	import { sanitizeFilename } from './Constants.svelte';
 	import { speakerSummary, type PlaybackState } from './media-ui';
 
@@ -51,7 +51,6 @@
 				decoding="async"
 				on:error={() => (failedImage = media.thumbnail)}
 			/>
-			<span class="play-icon"><IconPlayerPlayFilled size={14} aria-hidden="true" /></span>
 			{#if selected && playbackState === 'playing'}<span class="playing-badge">Lecture</span>{/if}
 		</div>
 	{/if}
@@ -144,7 +143,7 @@
 	.thumbnail-container {
 		position: relative;
 		align-self: center;
-		flex: 0 0 144px;
+		height: 100px;
 		aspect-ratio: 16 / 9;
 		border-radius: 4px;
 		overflow: hidden;
@@ -155,18 +154,6 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-	}
-	.play-icon {
-		position: absolute;
-		bottom: 3px;
-		right: 3px;
-		display: grid;
-		place-items: center;
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		background: rgb(0 0 0 / 65%);
-		color: white;
 	}
 	.playing-badge {
 		position: absolute;
@@ -253,11 +240,6 @@
 	}
 	.more-speakers {
 		padding-left: 30px;
-	}
-	@media (max-width: 1000px) {
-		.thumbnail-container {
-			flex-basis: 112px;
-		}
 	}
 	@media (max-width: 400px) {
 		.thumbnail-container {
