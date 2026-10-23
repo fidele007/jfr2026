@@ -1,0 +1,14 @@
+**
+!server/
+!server/**
+!scripts/
+!scripts/search-extractor.mjs
+!scripts/benchmark-search-api.mjs
+!src/
+!src/lib/
+!src/lib/search-scoring.mjs
+!data/
+!data/search/
+!data/search/index.json
+server/.env
+server/node_modules

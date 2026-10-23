@@ -8,9 +8,9 @@
 	export let semanticScore: number | undefined = undefined;
 
 	$: hasSemanticMatch = semanticScore !== undefined && Number.isFinite(semanticScore);
-	// Conservative display tier for the current E5 hybrid scores, not a confidence estimate.
+	// Conservative display tier for the current hybrid scores, not a confidence estimate.
 	$: matchLabel =
-		semanticScore !== undefined && semanticScore >= 0.92 ? 'Très pertinent' : 'Sujet proche';
+		semanticScore !== undefined && semanticScore >= 0.55 ? 'Très pertinent' : 'Sujet proche';
 	$: scoreDescription = hasSemanticMatch
 		? `Score de classement : ${semanticScore!.toLocaleString('fr-FR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}. Combine proximité de sens et mots-clés ; ce n'est pas un pourcentage de confiance.`
 		: '';

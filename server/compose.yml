@@ -1,0 +1,25 @@
+services:
+  search:
+    build:
+      context: ..
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:3080:3000"
+    environment:
+      SEARCH_ALLOWED_ORIGINS: ${SEARCH_ALLOWED_ORIGINS:?Set the exact website origin}
+      SEARCH_CPU_THREADS: "2"
+      SEARCH_TRUST_PROXY: ${SEARCH_TRUST_PROXY:-0}
+    volumes:
+      - model-cache:/app/.cache/transformers
+    cpus: 2
+    mem_limit: 4g
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 5m
+      retries: 3
+volumes:
+  model-cache:

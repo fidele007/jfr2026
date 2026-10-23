@@ -1,0 +1,2038 @@
+{
+  "note": "Raw embedding rankings: same catalogue and 75% title / 25% description blend. No lexical bonuses, translation rules or acceptance cutoff. Hand-authored model selection sets, not independent medical judgments.",
+  "catalogueHash": "9a451c70433c1e93285721ef3d28528d4505dd1480ac389111ba42ec1fcef677",
+  "suiteHash": "429194b20b4cf2f08fa3d8ba81d43ea46e38729c54db24dd3511059f48c29057",
+  "models": [
+    {
+      "model": "Xenova/paraphrase-multilingual-mpnet-base-v2",
+      "revision": "e5d116277351513fd260955ece953ecddde7046e",
+      "dtype": "q8",
+      "pooling": "mean",
+      "suites": [
+        {
+          "name": "search-queries",
+          "metrics": {
+            "top1": 19,
+            "top3": 20,
+            "total": 24
+          },
+          "ranks": {
+            "cancer du sein": 11,
+            "accident vasculaire cérébral": 1,
+            "dépistage des tumeurs mammaires": 1,
+            "calculs dans les reins": 1,
+            "allergie après injection de contraste": 1,
+            "douleur abdominale chez un enfant appendicite": 1,
+            "traiter une tumeur hépatique par ablation": 1,
+            "intelligence artificielle pour biopsie prostatique": 1,
+            "scanner à comptage de photons": 1,
+            "douleurs pelviennes endométriose IRM": 4,
+            "échographie du tendon achilléen": 1,
+            "embolie pulmonaire diagnostic pièges": 1,
+            "kystes du pancréas inquiétants": 1,
+            "IRM pour sclérose en plaques": 1,
+            "diminuer exposition aux rayons patients": 1,
+            "épuisement professionnel burn out": 1,
+            "céphalées faut il injecter": 14,
+            "échographie au début de la grossesse": 1,
+            "échographie des veines des jambes": 6,
+            "imagerie maladie Alzheimer": 1,
+            "ponction de la thyroïde": 1,
+            "hypertension de la veine porte": 1,
+            "infection pulmonaire aspergillus": 3,
+            "douleur testiculaire en urgence": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-holdout",
+          "metrics": {
+            "top1": 11,
+            "top3": 11,
+            "total": 12
+          },
+          "ranks": {
+            "imagerie du genou par ultrasons": 1,
+            "cancer pulmonaire dépistage": 1,
+            "prendre en charge un bébé secoué": 17,
+            "imagerie des infections respiratoires": 1,
+            "anatomie radiologique du coude": 1,
+            "traitement des nodules thyroïdiens bénins": 1,
+            "apprendre la mammographie": 1,
+            "embolisation des hématomes sous duraux": 1,
+            "responsabilité juridique du radiologue": 1,
+            "IRM du cœur avancée": 1,
+            "échographie du fœtus et IRM prénatale": 1,
+            "traitement focal du cancer prostatique": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-bilingual",
+          "metrics": {
+            "top1": 18,
+            "top3": 20,
+            "total": 22
+          },
+          "ranks": {
+            "breast": 1,
+            "breast imaging": 1,
+            "breast cancer": 1,
+            "breast screening": 1,
+            "lung cancer": 1,
+            "kidney stones": 7,
+            "stroke": 1,
+            "MRI multiple sclerosis": 1,
+            "pulmonary embolism": 3,
+            "thyroid nodules": 2,
+            "knee ultrasound": 1,
+            "liver ablation": 1,
+            "detecting cancer in dense breasts": 1,
+            "newborn brain injury": 44,
+            "uterine endometriosis MRI": 1,
+            "pancreatic cysts": 1,
+            "Alzheimer disease imaging": 1,
+            "Achilles tendon sonography": 1,
+            "early pregnancy ultrasound": 1,
+            "radiologist burnout": 1,
+            "cardiac magnetic resonance": 1,
+            "prostate targeted biopsy artificial intelligence": 1
+          },
+          "examples": [
+            {
+              "query": "breast",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "f74177bb-876a-4097-ac2a-2b7ad08110bf",
+                  "title": "Imagerie de la femme - Le sein traité après cancer : repères pratiques et pièges en imagerie mammaire",
+                  "score": 0.7177943347158152
+                },
+                {
+                  "id": "80ed9886-df22-4cc6-93ae-59966c9c7c7d",
+                  "title": "Imagerie de la femme - Nouveau BIRADS Mammographie-tomosynthèse",
+                  "score": 0.6233852567330324
+                },
+                {
+                  "id": "2045ce2a-d77c-4220-9e26-4a881bf709da",
+                  "title": "Autour du pelvis féminin",
+                  "score": 0.5849286707641472
+                }
+              ]
+            },
+            {
+              "query": "kidney stones",
+              "rank": 7,
+              "top": [
+                {
+                  "id": "765847f9-ac25-4b39-9d5b-e0350fe4ad36",
+                  "title": "Tumeurs du rein : comment je raisonne",
+                  "score": 0.6036535941977801
+                },
+                {
+                  "id": "15dd06b3-0ca5-40c3-99cb-3ad1ab4ab7ec",
+                  "title": "Echo-Doppler - Transplantation rénale",
+                  "score": 0.5434771172876448
+                },
+                {
+                  "id": "0572b709-70a1-46bf-a9b2-34b69d9e7dd9",
+                  "title": "Thermoablation des tumeurs du rein: une alliance entre radiologues, urologues et patients",
+                  "score": 0.5121002249846625
+                }
+              ]
+            },
+            {
+              "query": "stroke",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "c0871bc4-c398-446b-b6de-5aa9bbe4e047",
+                  "title": "Séance de cas cliniques : Accident Vasculaire Cérébral de l'enfant",
+                  "score": 0.5072519860218705
+                },
+                {
+                  "id": "6f36e5d0-7720-4394-a124-ebbb1dae3a9d",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.4760182797011877
+                },
+                {
+                  "id": "601c0dad-6400-4cab-9670-fe52bec4b4d4",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.4760182797011877
+                }
+              ]
+            },
+            {
+              "query": "MRI multiple sclerosis",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "db348eb7-0276-46e8-bace-e72f2f1cbd81",
+                  "title": "Imagerie de la sclérose en plaques en 2026 : fondamentaux, évolutions et perspectives",
+                  "score": 0.6749838880274677
+                },
+                {
+                  "id": "6f36e5d0-7720-4394-a124-ebbb1dae3a9d",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.6038347321047899
+                },
+                {
+                  "id": "601c0dad-6400-4cab-9670-fe52bec4b4d4",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.6038347321047899
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "search-medical-holdout",
+          "metrics": {
+            "top1": 14,
+            "top3": 17,
+            "total": 30
+          },
+          "ranks": {
+            "urolithiasis": 1,
+            "renal calculi": 2,
+            "lithiase rénale": 53,
+            "urinary stone detection": 1,
+            "ischemic stroke emergency": 2,
+            "accident ischémique cérébral": 7,
+            "bowel obstruction": 21,
+            "occlusion intestinale": 17,
+            "acute pancreatitis": 2,
+            "pancréatite aiguë": 1,
+            "hepatic metastases": 6,
+            "secondary tumors in the liver": 14,
+            "métastases du foie": 5,
+            "adrenal incidentaloma": 38,
+            "incidental adrenal mass": 247,
+            "masse surrénalienne fortuite": 229,
+            "deep vein thrombosis Doppler": 1,
+            "thrombose veineuse écho doppler": 1,
+            "lymphoma imaging": 1,
+            "imagerie du lymphome": 1,
+            "thyroid fine needle aspiration": 138,
+            "cytoponction thyroïdienne": 6,
+            "pediatric appendicitis ultrasound": 1,
+            "échographie appendicite pédiatrique": 1,
+            "prostate artery embolization": 1,
+            "embolisation prostatique": 1,
+            "cervical pain management": 5,
+            "traitement des cervicalgies": 1,
+            "treated breast after cancer": 1,
+            "follow-up imaging after breast cancer treatment": 1
+          },
+          "examples": []
+        }
+      ]
+    },
+    {
+      "model": "Xenova/multilingual-e5-base",
+      "revision": "d59ab9ac3405fabf723089ec5577010211014c99",
+      "dtype": "q8",
+      "pooling": "mean",
+      "suites": [
+        {
+          "name": "search-queries",
+          "metrics": {
+            "top1": 17,
+            "top3": 19,
+            "total": 24
+          },
+          "ranks": {
+            "cancer du sein": 1,
+            "accident vasculaire cérébral": 1,
+            "dépistage des tumeurs mammaires": 1,
+            "calculs dans les reins": 1,
+            "allergie après injection de contraste": 1,
+            "douleur abdominale chez un enfant appendicite": 1,
+            "traiter une tumeur hépatique par ablation": 1,
+            "intelligence artificielle pour biopsie prostatique": 2,
+            "scanner à comptage de photons": 1,
+            "douleurs pelviennes endométriose IRM": 1,
+            "échographie du tendon achilléen": 6,
+            "embolie pulmonaire diagnostic pièges": 1,
+            "kystes du pancréas inquiétants": 1,
+            "IRM pour sclérose en plaques": 2,
+            "diminuer exposition aux rayons patients": 50,
+            "épuisement professionnel burn out": 1,
+            "céphalées faut il injecter": 1,
+            "échographie au début de la grossesse": 6,
+            "échographie des veines des jambes": 26,
+            "imagerie maladie Alzheimer": 1,
+            "ponction de la thyroïde": 1,
+            "hypertension de la veine porte": 1,
+            "infection pulmonaire aspergillus": 1,
+            "douleur testiculaire en urgence": 6
+          },
+          "examples": []
+        },
+        {
+          "name": "search-holdout",
+          "metrics": {
+            "top1": 10,
+            "top3": 11,
+            "total": 12
+          },
+          "ranks": {
+            "imagerie du genou par ultrasons": 1,
+            "cancer pulmonaire dépistage": 1,
+            "prendre en charge un bébé secoué": 1,
+            "imagerie des infections respiratoires": 1,
+            "anatomie radiologique du coude": 1,
+            "traitement des nodules thyroïdiens bénins": 1,
+            "apprendre la mammographie": 7,
+            "embolisation des hématomes sous duraux": 1,
+            "responsabilité juridique du radiologue": 1,
+            "IRM du cœur avancée": 1,
+            "échographie du fœtus et IRM prénatale": 2,
+            "traitement focal du cancer prostatique": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-bilingual",
+          "metrics": {
+            "top1": 11,
+            "top3": 13,
+            "total": 22
+          },
+          "ranks": {
+            "breast": 1,
+            "breast imaging": 1,
+            "breast cancer": 1,
+            "breast screening": 1,
+            "lung cancer": 1,
+            "kidney stones": 1,
+            "stroke": 23,
+            "MRI multiple sclerosis": 26,
+            "pulmonary embolism": 4,
+            "thyroid nodules": 1,
+            "knee ultrasound": 7,
+            "liver ablation": 1,
+            "detecting cancer in dense breasts": 3,
+            "newborn brain injury": 5,
+            "uterine endometriosis MRI": 1,
+            "pancreatic cysts": 15,
+            "Alzheimer disease imaging": 1,
+            "Achilles tendon sonography": 9,
+            "early pregnancy ultrasound": 12,
+            "radiologist burnout": 1,
+            "cardiac magnetic resonance": 5,
+            "prostate targeted biopsy artificial intelligence": 2
+          },
+          "examples": [
+            {
+              "query": "breast",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "f74177bb-876a-4097-ac2a-2b7ad08110bf",
+                  "title": "Imagerie de la femme - Le sein traité après cancer : repères pratiques et pièges en imagerie mammaire",
+                  "score": 0.824267486917513
+                },
+                {
+                  "id": "56c8b33c-1ab9-4579-9079-0517ca50d2d9",
+                  "title": "Macrobiopsie du sein",
+                  "score": 0.8182925101766627
+                },
+                {
+                  "id": "7503738f-44f4-453f-9808-02eafec0903a",
+                  "title": "Macrobiopsie du sein",
+                  "score": 0.8182925101766627
+                }
+              ]
+            },
+            {
+              "query": "kidney stones",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "7df2686c-4f65-4670-9b39-1f51b850e6f0",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.8166547816240618
+                },
+                {
+                  "id": "d31a8e6e-55ff-4a3b-aebd-be54e4991f96",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.8166547816240618
+                },
+                {
+                  "id": "5e43c0da-da69-40b7-938e-57910735a034",
+                  "title": "Embolisation musculosquelettique",
+                  "score": 0.8031837572116559
+                }
+              ]
+            },
+            {
+              "query": "stroke",
+              "rank": 23,
+              "top": [
+                {
+                  "id": "41558f21-b428-4f85-aafe-1ae4be915bba",
+                  "title": "LUSORIA et trajet atypique NON RECURENT du Nerf laryngé Inférieur Droit",
+                  "score": 0.8267323177342383
+                },
+                {
+                  "id": "9c41e19b-002b-49e0-a05e-ef2b0f0f2d03",
+                  "title": "LUSORIA et trajet atypique NON RECURENT du Nerf laryngé Inférieur Droit",
+                  "score": 0.8267323177342383
+                },
+                {
+                  "id": "2e60c3e0-75e7-4993-86f2-c053ccd39dec",
+                  "title": "Thrombectomie mécanique rotationnelle & aspiration",
+                  "score": 0.8227845689094399
+                }
+              ]
+            },
+            {
+              "query": "MRI multiple sclerosis",
+              "rank": 26,
+              "top": [
+                {
+                  "id": "5decfa2c-65bf-4873-b16f-6aad0862673c",
+                  "title": "Your JFR : Musculoskeletal oncology imaging: from quantitative MRI to reporting systems",
+                  "score": 0.8226664011078239
+                },
+                {
+                  "id": "38821488-ce6c-4cbf-b725-a1c2f320de9b",
+                  "title": "Instabilité douloureuse des MTP des rayons latéraux",
+                  "score": 0.8194092262897242
+                },
+                {
+                  "id": "550c6156-fca9-47d2-922c-29a5525041ce",
+                  "title": "Instabilité douloureuse des MTP des rayons latéraux",
+                  "score": 0.8194092262897242
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "search-medical-holdout",
+          "metrics": {
+            "top1": 17,
+            "top3": 19,
+            "total": 30
+          },
+          "ranks": {
+            "urolithiasis": 1,
+            "renal calculi": 1,
+            "lithiase rénale": 14,
+            "urinary stone detection": 1,
+            "ischemic stroke emergency": 5,
+            "accident ischémique cérébral": 1,
+            "bowel obstruction": 4,
+            "occlusion intestinale": 1,
+            "acute pancreatitis": 1,
+            "pancréatite aiguë": 1,
+            "hepatic metastases": 2,
+            "secondary tumors in the liver": 296,
+            "métastases du foie": 109,
+            "adrenal incidentaloma": 3,
+            "incidental adrenal mass": 117,
+            "masse surrénalienne fortuite": 155,
+            "deep vein thrombosis Doppler": 1,
+            "thrombose veineuse écho doppler": 1,
+            "lymphoma imaging": 1,
+            "imagerie du lymphome": 1,
+            "thyroid fine needle aspiration": 49,
+            "cytoponction thyroïdienne": 7,
+            "pediatric appendicitis ultrasound": 1,
+            "échographie appendicite pédiatrique": 1,
+            "prostate artery embolization": 1,
+            "embolisation prostatique": 1,
+            "cervical pain management": 160,
+            "traitement des cervicalgies": 5,
+            "treated breast after cancer": 1,
+            "follow-up imaging after breast cancer treatment": 1
+          },
+          "examples": []
+        }
+      ]
+    },
+    {
+      "model": "Xenova/multilingual-e5-large",
+      "revision": "00fc3aeb3dbb95842de2ac1961d33c6319acf57b",
+      "dtype": "q8",
+      "pooling": "mean",
+      "suites": [
+        {
+          "name": "search-queries",
+          "metrics": {
+            "top1": 20,
+            "top3": 23,
+            "total": 24
+          },
+          "ranks": {
+            "cancer du sein": 1,
+            "accident vasculaire cérébral": 1,
+            "dépistage des tumeurs mammaires": 3,
+            "calculs dans les reins": 1,
+            "allergie après injection de contraste": 1,
+            "douleur abdominale chez un enfant appendicite": 1,
+            "traiter une tumeur hépatique par ablation": 1,
+            "intelligence artificielle pour biopsie prostatique": 1,
+            "scanner à comptage de photons": 1,
+            "douleurs pelviennes endométriose IRM": 1,
+            "échographie du tendon achilléen": 1,
+            "embolie pulmonaire diagnostic pièges": 1,
+            "kystes du pancréas inquiétants": 1,
+            "IRM pour sclérose en plaques": 3,
+            "diminuer exposition aux rayons patients": 3,
+            "épuisement professionnel burn out": 1,
+            "céphalées faut il injecter": 1,
+            "échographie au début de la grossesse": 1,
+            "échographie des veines des jambes": 14,
+            "imagerie maladie Alzheimer": 1,
+            "ponction de la thyroïde": 1,
+            "hypertension de la veine porte": 1,
+            "infection pulmonaire aspergillus": 1,
+            "douleur testiculaire en urgence": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-holdout",
+          "metrics": {
+            "top1": 11,
+            "top3": 12,
+            "total": 12
+          },
+          "ranks": {
+            "imagerie du genou par ultrasons": 1,
+            "cancer pulmonaire dépistage": 1,
+            "prendre en charge un bébé secoué": 1,
+            "imagerie des infections respiratoires": 1,
+            "anatomie radiologique du coude": 1,
+            "traitement des nodules thyroïdiens bénins": 1,
+            "apprendre la mammographie": 3,
+            "embolisation des hématomes sous duraux": 1,
+            "responsabilité juridique du radiologue": 1,
+            "IRM du cœur avancée": 1,
+            "échographie du fœtus et IRM prénatale": 1,
+            "traitement focal du cancer prostatique": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-bilingual",
+          "metrics": {
+            "top1": 12,
+            "top3": 15,
+            "total": 22
+          },
+          "ranks": {
+            "breast": 3,
+            "breast imaging": 1,
+            "breast cancer": 1,
+            "breast screening": 1,
+            "lung cancer": 1,
+            "kidney stones": 1,
+            "stroke": 34,
+            "MRI multiple sclerosis": 69,
+            "pulmonary embolism": 5,
+            "thyroid nodules": 1,
+            "knee ultrasound": 5,
+            "liver ablation": 1,
+            "detecting cancer in dense breasts": 3,
+            "newborn brain injury": 17,
+            "uterine endometriosis MRI": 1,
+            "pancreatic cysts": 8,
+            "Alzheimer disease imaging": 1,
+            "Achilles tendon sonography": 1,
+            "early pregnancy ultrasound": 1,
+            "radiologist burnout": 1,
+            "cardiac magnetic resonance": 12,
+            "prostate targeted biopsy artificial intelligence": 2
+          },
+          "examples": [
+            {
+              "query": "breast",
+              "rank": 3,
+              "top": [
+                {
+                  "id": "196ce053-2d57-4420-a28b-fc14af2f9eea",
+                  "title": "Muscle Grand pectoral",
+                  "score": 0.8214640111997324
+                },
+                {
+                  "id": "73ca4097-adcd-4b53-b0ff-c14fcebdf77b",
+                  "title": "Muscle Grand pectoral",
+                  "score": 0.8214640111997324
+                },
+                {
+                  "id": "f74177bb-876a-4097-ac2a-2b7ad08110bf",
+                  "title": "Imagerie de la femme - Le sein traité après cancer : repères pratiques et pièges en imagerie mammaire",
+                  "score": 0.8118733269130198
+                }
+              ]
+            },
+            {
+              "query": "kidney stones",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "7df2686c-4f65-4670-9b39-1f51b850e6f0",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.8416514801411098
+                },
+                {
+                  "id": "d31a8e6e-55ff-4a3b-aebd-be54e4991f96",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.8416514801411098
+                },
+                {
+                  "id": "70f1c1f5-1913-45ec-afde-ca29ffd6f983",
+                  "title": "Your JFR : Advances in uro-imaging",
+                  "score": 0.8064969871514951
+                }
+              ]
+            },
+            {
+              "query": "stroke",
+              "rank": 34,
+              "top": [
+                {
+                  "id": "d8829bb1-486d-4876-876f-a74190401957",
+                  "title": "Your JFR : Anatomical landmarks and diagnosis of skull base pathologies and emergency imaging of head and neck lesions",
+                  "score": 0.7970452713858356
+                },
+                {
+                  "id": "2e60c3e0-75e7-4993-86f2-c053ccd39dec",
+                  "title": "Thrombectomie mécanique rotationnelle & aspiration",
+                  "score": 0.7954642832315667
+                },
+                {
+                  "id": "5e43c0da-da69-40b7-938e-57910735a034",
+                  "title": "Embolisation musculosquelettique",
+                  "score": 0.7950655757758586
+                }
+              ]
+            },
+            {
+              "query": "MRI multiple sclerosis",
+              "rank": 69,
+              "top": [
+                {
+                  "id": "5decfa2c-65bf-4873-b16f-6aad0862673c",
+                  "title": "Your JFR : Musculoskeletal oncology imaging: from quantitative MRI to reporting systems",
+                  "score": 0.8364814605013948
+                },
+                {
+                  "id": "17d4d1d1-4f05-4c6b-acdb-afd84c7c9d0f",
+                  "title": "Atelier multimodalité du système nerveux central - Imagerie en pathologie tumorale",
+                  "score": 0.8344677356659155
+                },
+                {
+                  "id": "6f36e5d0-7720-4394-a124-ebbb1dae3a9d",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.83247527376003
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "search-medical-holdout",
+          "metrics": {
+            "top1": 24,
+            "top3": 26,
+            "total": 30
+          },
+          "ranks": {
+            "urolithiasis": 1,
+            "renal calculi": 1,
+            "lithiase rénale": 1,
+            "urinary stone detection": 1,
+            "ischemic stroke emergency": 2,
+            "accident ischémique cérébral": 1,
+            "bowel obstruction": 1,
+            "occlusion intestinale": 1,
+            "acute pancreatitis": 1,
+            "pancréatite aiguë": 1,
+            "hepatic metastases": 1,
+            "secondary tumors in the liver": 48,
+            "métastases du foie": 18,
+            "adrenal incidentaloma": 1,
+            "incidental adrenal mass": 1,
+            "masse surrénalienne fortuite": 50,
+            "deep vein thrombosis Doppler": 1,
+            "thrombose veineuse écho doppler": 1,
+            "lymphoma imaging": 1,
+            "imagerie du lymphome": 1,
+            "thyroid fine needle aspiration": 9,
+            "cytoponction thyroïdienne": 1,
+            "pediatric appendicitis ultrasound": 1,
+            "échographie appendicite pédiatrique": 1,
+            "prostate artery embolization": 1,
+            "embolisation prostatique": 1,
+            "cervical pain management": 3,
+            "traitement des cervicalgies": 1,
+            "treated breast after cancer": 1,
+            "follow-up imaging after breast cancer treatment": 1
+          },
+          "examples": []
+        }
+      ]
+    },
+    {
+      "model": "Xenova/bge-m3",
+      "revision": "4de13258303883538bd53b696b452bf8099f0858",
+      "dtype": "q8",
+      "pooling": "cls",
+      "suites": [
+        {
+          "name": "search-queries",
+          "metrics": {
+            "top1": 20,
+            "top3": 22,
+            "total": 24
+          },
+          "ranks": {
+            "cancer du sein": 1,
+            "accident vasculaire cérébral": 1,
+            "dépistage des tumeurs mammaires": 1,
+            "calculs dans les reins": 1,
+            "allergie après injection de contraste": 3,
+            "douleur abdominale chez un enfant appendicite": 1,
+            "traiter une tumeur hépatique par ablation": 1,
+            "intelligence artificielle pour biopsie prostatique": 1,
+            "scanner à comptage de photons": 1,
+            "douleurs pelviennes endométriose IRM": 1,
+            "échographie du tendon achilléen": 3,
+            "embolie pulmonaire diagnostic pièges": 1,
+            "kystes du pancréas inquiétants": 1,
+            "IRM pour sclérose en plaques": 1,
+            "diminuer exposition aux rayons patients": 65,
+            "épuisement professionnel burn out": 1,
+            "céphalées faut il injecter": 1,
+            "échographie au début de la grossesse": 1,
+            "échographie des veines des jambes": 66,
+            "imagerie maladie Alzheimer": 1,
+            "ponction de la thyroïde": 1,
+            "hypertension de la veine porte": 1,
+            "infection pulmonaire aspergillus": 1,
+            "douleur testiculaire en urgence": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-holdout",
+          "metrics": {
+            "top1": 10,
+            "top3": 12,
+            "total": 12
+          },
+          "ranks": {
+            "imagerie du genou par ultrasons": 1,
+            "cancer pulmonaire dépistage": 1,
+            "prendre en charge un bébé secoué": 1,
+            "imagerie des infections respiratoires": 3,
+            "anatomie radiologique du coude": 1,
+            "traitement des nodules thyroïdiens bénins": 1,
+            "apprendre la mammographie": 1,
+            "embolisation des hématomes sous duraux": 1,
+            "responsabilité juridique du radiologue": 1,
+            "IRM du cœur avancée": 1,
+            "échographie du fœtus et IRM prénatale": 2,
+            "traitement focal du cancer prostatique": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-bilingual",
+          "metrics": {
+            "top1": 14,
+            "top3": 17,
+            "total": 22
+          },
+          "ranks": {
+            "breast": 1,
+            "breast imaging": 2,
+            "breast cancer": 1,
+            "breast screening": 1,
+            "lung cancer": 1,
+            "kidney stones": 1,
+            "stroke": 38,
+            "MRI multiple sclerosis": 33,
+            "pulmonary embolism": 8,
+            "thyroid nodules": 1,
+            "knee ultrasound": 1,
+            "liver ablation": 1,
+            "detecting cancer in dense breasts": 2,
+            "newborn brain injury": 19,
+            "uterine endometriosis MRI": 1,
+            "pancreatic cysts": 1,
+            "Alzheimer disease imaging": 1,
+            "Achilles tendon sonography": 3,
+            "early pregnancy ultrasound": 1,
+            "radiologist burnout": 1,
+            "cardiac magnetic resonance": 6,
+            "prostate targeted biopsy artificial intelligence": 1
+          },
+          "examples": [
+            {
+              "query": "breast",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "35d9f311-ab28-4a96-9636-cd42db444c7e",
+                  "title": "Microbiopsie du sein",
+                  "score": 0.5235351045703222
+                },
+                {
+                  "id": "f469f8d0-e92e-445e-bad2-116586e7629e",
+                  "title": "Microbiopsie du sein",
+                  "score": 0.5235351045703222
+                },
+                {
+                  "id": "2045ce2a-d77c-4220-9e26-4a881bf709da",
+                  "title": "Autour du pelvis féminin",
+                  "score": 0.5214026035261038
+                }
+              ]
+            },
+            {
+              "query": "kidney stones",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "7df2686c-4f65-4670-9b39-1f51b850e6f0",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.5453501236611331
+                },
+                {
+                  "id": "d31a8e6e-55ff-4a3b-aebd-be54e4991f96",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.5453501236611331
+                },
+                {
+                  "id": "1ba72054-1670-4369-a19b-ff76be49fa77",
+                  "title": "La place du micro-onde dans le traitement des tumeurs du rein",
+                  "score": 0.4999780346312546
+                }
+              ]
+            },
+            {
+              "query": "stroke",
+              "rank": 38,
+              "top": [
+                {
+                  "id": "8cad6b39-9597-4090-a1bb-ebf25f2750a7",
+                  "title": "Scrotum aigu et lésions intratesticulaire : comment je raisonne ?",
+                  "score": 0.4480234057354571
+                },
+                {
+                  "id": "9204d2cf-c5e2-4989-aa76-9abb8dbd7c98",
+                  "title": "Elastographie",
+                  "score": 0.4403943493445926
+                },
+                {
+                  "id": "3422fc09-be1a-4dc0-b06c-0028ffbeec6e",
+                  "title": "Elastographie",
+                  "score": 0.4403943493445926
+                }
+              ]
+            },
+            {
+              "query": "MRI multiple sclerosis",
+              "rank": 33,
+              "top": [
+                {
+                  "id": "8a30f703-5796-4809-b32c-6d24549fe600",
+                  "title": "Cas cliniques en imagerie musculosuqelettique",
+                  "score": 0.5762073497972748
+                },
+                {
+                  "id": "66232b5c-4af6-4388-9548-27e92d966306",
+                  "title": "Cas cliniques en imagerie musculosquelettique",
+                  "score": 0.5655440242936229
+                },
+                {
+                  "id": "b83bf270-f1cb-4d79-9125-11cb79723141",
+                  "title": "Cas cliniques en imagerie musculosquelettique",
+                  "score": 0.5655440242936229
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "search-medical-holdout",
+          "metrics": {
+            "top1": 19,
+            "top3": 22,
+            "total": 30
+          },
+          "ranks": {
+            "urolithiasis": 2,
+            "renal calculi": 1,
+            "lithiase rénale": 1,
+            "urinary stone detection": 1,
+            "ischemic stroke emergency": 2,
+            "accident ischémique cérébral": 2,
+            "bowel obstruction": 35,
+            "occlusion intestinale": 1,
+            "acute pancreatitis": 1,
+            "pancréatite aiguë": 1,
+            "hepatic metastases": 1,
+            "secondary tumors in the liver": 125,
+            "métastases du foie": 6,
+            "adrenal incidentaloma": 1,
+            "incidental adrenal mass": 56,
+            "masse surrénalienne fortuite": 167,
+            "deep vein thrombosis Doppler": 5,
+            "thrombose veineuse écho doppler": 1,
+            "lymphoma imaging": 1,
+            "imagerie du lymphome": 1,
+            "thyroid fine needle aspiration": 38,
+            "cytoponction thyroïdienne": 1,
+            "pediatric appendicitis ultrasound": 1,
+            "échographie appendicite pédiatrique": 1,
+            "prostate artery embolization": 1,
+            "embolisation prostatique": 1,
+            "cervical pain management": 5,
+            "traitement des cervicalgies": 1,
+            "treated breast after cancer": 1,
+            "follow-up imaging after breast cancer treatment": 1
+          },
+          "examples": []
+        }
+      ]
+    },
+    {
+      "model": "onnx-community/Qwen3-Embedding-0.6B-ONNX",
+      "revision": "c25a394dd583836952667c12f008335071b3f43d",
+      "dtype": "q8",
+      "pooling": "last_token",
+      "suites": [
+        {
+          "name": "search-queries",
+          "metrics": {
+            "top1": 12,
+            "top3": 14,
+            "total": 24
+          },
+          "ranks": {
+            "cancer du sein": 5,
+            "accident vasculaire cérébral": 1,
+            "dépistage des tumeurs mammaires": 9,
+            "calculs dans les reins": 320,
+            "allergie après injection de contraste": 155,
+            "douleur abdominale chez un enfant appendicite": 52,
+            "traiter une tumeur hépatique par ablation": 2,
+            "intelligence artificielle pour biopsie prostatique": 1,
+            "scanner à comptage de photons": 1,
+            "douleurs pelviennes endométriose IRM": 5,
+            "échographie du tendon achilléen": 1,
+            "embolie pulmonaire diagnostic pièges": 1,
+            "kystes du pancréas inquiétants": 1,
+            "IRM pour sclérose en plaques": 1,
+            "diminuer exposition aux rayons patients": 21,
+            "épuisement professionnel burn out": 1,
+            "céphalées faut il injecter": 1,
+            "échographie au début de la grossesse": 7,
+            "échographie des veines des jambes": 117,
+            "imagerie maladie Alzheimer": 1,
+            "ponction de la thyroïde": 1,
+            "hypertension de la veine porte": 1,
+            "infection pulmonaire aspergillus": 3,
+            "douleur testiculaire en urgence": 13
+          },
+          "examples": []
+        },
+        {
+          "name": "search-holdout",
+          "metrics": {
+            "top1": 7,
+            "top3": 9,
+            "total": 12
+          },
+          "ranks": {
+            "imagerie du genou par ultrasons": 273,
+            "cancer pulmonaire dépistage": 1,
+            "prendre en charge un bébé secoué": 117,
+            "imagerie des infections respiratoires": 1,
+            "anatomie radiologique du coude": 1,
+            "traitement des nodules thyroïdiens bénins": 1,
+            "apprendre la mammographie": 2,
+            "embolisation des hématomes sous duraux": 1,
+            "responsabilité juridique du radiologue": 1,
+            "IRM du cœur avancée": 30,
+            "échographie du fœtus et IRM prénatale": 2,
+            "traitement focal du cancer prostatique": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-bilingual",
+          "metrics": {
+            "top1": 3,
+            "top3": 9,
+            "total": 22
+          },
+          "ranks": {
+            "breast": 37,
+            "breast imaging": 2,
+            "breast cancer": 7,
+            "breast screening": 20,
+            "lung cancer": 3,
+            "kidney stones": 140,
+            "stroke": 183,
+            "MRI multiple sclerosis": 5,
+            "pulmonary embolism": 2,
+            "thyroid nodules": 1,
+            "knee ultrasound": 185,
+            "liver ablation": 49,
+            "detecting cancer in dense breasts": 7,
+            "newborn brain injury": 400,
+            "uterine endometriosis MRI": 2,
+            "pancreatic cysts": 1,
+            "Alzheimer disease imaging": 1,
+            "Achilles tendon sonography": 13,
+            "early pregnancy ultrasound": 233,
+            "radiologist burnout": 3,
+            "cardiac magnetic resonance": 70,
+            "prostate targeted biopsy artificial intelligence": 2
+          },
+          "examples": [
+            {
+              "query": "breast",
+              "rank": 37,
+              "top": [
+                {
+                  "id": "379c0ea5-3608-42e1-80ad-644fb4731ce7",
+                  "title": "Atelier multimodalité d'imagerie thoracique - Le suivi thérapeutique du cancer bronchique",
+                  "score": 0.529705733820043
+                },
+                {
+                  "id": "5a6fb37b-c2ff-43de-8a4d-3c5c22810f7c",
+                  "title": "Imagerie de la femme - Annonce en imagerie gynécologique: rôle et posture du radiologue",
+                  "score": 0.5262454131273243
+                },
+                {
+                  "id": "c1b0af9b-4643-46b3-a0d3-77687e4cd2de",
+                  "title": "Séance de communications orales en radiologie interventionnelle",
+                  "score": 0.5219419371184347
+                }
+              ]
+            },
+            {
+              "query": "kidney stones",
+              "rank": 140,
+              "top": [
+                {
+                  "id": "71890546-4500-4c2a-961b-61b51606b0d2",
+                  "title": "SIMS JUNIOR Session 1 - Radiologie MSK : Niveau 1 et 2",
+                  "score": 0.4818300568498177
+                },
+                {
+                  "id": "9c0fc6c0-1e2f-48c7-8be6-179c6a323453",
+                  "title": "SIMS JUNIOR Session 3 - Radiologie MSK : Extrem IR",
+                  "score": 0.4694264202498061
+                },
+                {
+                  "id": "54aaa67e-cd55-4a26-ae02-6b0d5b69b562",
+                  "title": "SIMS JUNOR Session 2 - Radiologie MSK : Niveau 3",
+                  "score": 0.4600910048325977
+                }
+              ]
+            },
+            {
+              "query": "stroke",
+              "rank": 183,
+              "top": [
+                {
+                  "id": "029f4f9b-5d4e-4031-ae4c-ba6b1133a9b6",
+                  "title": "Imagerie pédiatrique - Cystosonographie en pratique: indications et technique",
+                  "score": 0.4788116866687579
+                },
+                {
+                  "id": "50352d05-bb4e-451d-88e3-25e3ac94555f",
+                  "title": "Erreurs en radiologie d’urgence : comprendre pour mieux prévenir",
+                  "score": 0.45469937930066484
+                },
+                {
+                  "id": "7c1fe5c4-0f76-48ba-bcd8-142f9160f94a",
+                  "title": "Pays à l'honneur : Colombie - Interventional radiology beyond the interventional radiology suite",
+                  "score": 0.4467509788964943
+                }
+              ]
+            },
+            {
+              "query": "MRI multiple sclerosis",
+              "rank": 5,
+              "top": [
+                {
+                  "id": "9c0fc6c0-1e2f-48c7-8be6-179c6a323453",
+                  "title": "SIMS JUNIOR Session 3 - Radiologie MSK : Extrem IR",
+                  "score": 0.5491801704747068
+                },
+                {
+                  "id": "71890546-4500-4c2a-961b-61b51606b0d2",
+                  "title": "SIMS JUNIOR Session 1 - Radiologie MSK : Niveau 1 et 2",
+                  "score": 0.5303852763421084
+                },
+                {
+                  "id": "54aaa67e-cd55-4a26-ae02-6b0d5b69b562",
+                  "title": "SIMS JUNOR Session 2 - Radiologie MSK : Niveau 3",
+                  "score": 0.48945083022697367
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "search-medical-holdout",
+          "metrics": {
+            "top1": 12,
+            "top3": 17,
+            "total": 30
+          },
+          "ranks": {
+            "urolithiasis": 2,
+            "renal calculi": 157,
+            "lithiase rénale": 8,
+            "urinary stone detection": 1,
+            "ischemic stroke emergency": 67,
+            "accident ischémique cérébral": 3,
+            "bowel obstruction": 2,
+            "occlusion intestinale": 1,
+            "acute pancreatitis": 253,
+            "pancréatite aiguë": 5,
+            "hepatic metastases": 1,
+            "secondary tumors in the liver": 1,
+            "métastases du foie": 1,
+            "adrenal incidentaloma": 37,
+            "incidental adrenal mass": 51,
+            "masse surrénalienne fortuite": 56,
+            "deep vein thrombosis Doppler": 1,
+            "thrombose veineuse écho doppler": 1,
+            "lymphoma imaging": 1,
+            "imagerie du lymphome": 1,
+            "thyroid fine needle aspiration": 362,
+            "cytoponction thyroïdienne": 1,
+            "pediatric appendicitis ultrasound": 97,
+            "échographie appendicite pédiatrique": 80,
+            "prostate artery embolization": 3,
+            "embolisation prostatique": 1,
+            "cervical pain management": 2,
+            "traitement des cervicalgies": 1,
+            "treated breast after cancer": 22,
+            "follow-up imaging after breast cancer treatment": 49
+          },
+          "examples": []
+        }
+      ]
+    },
+    {
+      "model": "FremyCompany/BioLORD-2023-M",
+      "revision": "4ea2ea2c89ef63365f7fcd91406a0cd8ac36d2e2",
+      "dtype": "q8",
+      "pooling": "mean",
+      "suites": [
+        {
+          "name": "search-queries",
+          "metrics": {
+            "top1": 21,
+            "top3": 23,
+            "total": 24
+          },
+          "ranks": {
+            "cancer du sein": 1,
+            "accident vasculaire cérébral": 1,
+            "dépistage des tumeurs mammaires": 1,
+            "calculs dans les reins": 1,
+            "allergie après injection de contraste": 1,
+            "douleur abdominale chez un enfant appendicite": 1,
+            "traiter une tumeur hépatique par ablation": 1,
+            "intelligence artificielle pour biopsie prostatique": 1,
+            "scanner à comptage de photons": 1,
+            "douleurs pelviennes endométriose IRM": 1,
+            "échographie du tendon achilléen": 1,
+            "embolie pulmonaire diagnostic pièges": 1,
+            "kystes du pancréas inquiétants": 1,
+            "IRM pour sclérose en plaques": 2,
+            "diminuer exposition aux rayons patients": 1,
+            "épuisement professionnel burn out": 1,
+            "céphalées faut il injecter": 1,
+            "échographie au début de la grossesse": 1,
+            "échographie des veines des jambes": 1,
+            "imagerie maladie Alzheimer": 8,
+            "ponction de la thyroïde": 1,
+            "hypertension de la veine porte": 1,
+            "infection pulmonaire aspergillus": 1,
+            "douleur testiculaire en urgence": 2
+          },
+          "examples": []
+        },
+        {
+          "name": "search-holdout",
+          "metrics": {
+            "top1": 12,
+            "top3": 12,
+            "total": 12
+          },
+          "ranks": {
+            "imagerie du genou par ultrasons": 1,
+            "cancer pulmonaire dépistage": 1,
+            "prendre en charge un bébé secoué": 1,
+            "imagerie des infections respiratoires": 1,
+            "anatomie radiologique du coude": 1,
+            "traitement des nodules thyroïdiens bénins": 1,
+            "apprendre la mammographie": 1,
+            "embolisation des hématomes sous duraux": 1,
+            "responsabilité juridique du radiologue": 1,
+            "IRM du cœur avancée": 1,
+            "échographie du fœtus et IRM prénatale": 1,
+            "traitement focal du cancer prostatique": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-bilingual",
+          "metrics": {
+            "top1": 20,
+            "top3": 22,
+            "total": 22
+          },
+          "ranks": {
+            "breast": 1,
+            "breast imaging": 1,
+            "breast cancer": 1,
+            "breast screening": 1,
+            "lung cancer": 1,
+            "kidney stones": 1,
+            "stroke": 1,
+            "MRI multiple sclerosis": 2,
+            "pulmonary embolism": 2,
+            "thyroid nodules": 1,
+            "knee ultrasound": 1,
+            "liver ablation": 1,
+            "detecting cancer in dense breasts": 1,
+            "newborn brain injury": 1,
+            "uterine endometriosis MRI": 1,
+            "pancreatic cysts": 1,
+            "Alzheimer disease imaging": 1,
+            "Achilles tendon sonography": 1,
+            "early pregnancy ultrasound": 1,
+            "radiologist burnout": 1,
+            "cardiac magnetic resonance": 1,
+            "prostate targeted biopsy artificial intelligence": 1
+          },
+          "examples": [
+            {
+              "query": "breast",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "6824c4e7-ed9d-47a7-8f86-c745626dd652",
+                  "title": "Pathologies mammaires chez l’adolescente et la femme jeune : ce que le radiologue doit savoir",
+                  "score": 0.6265143211617816
+                },
+                {
+                  "id": "56c8b33c-1ab9-4579-9079-0517ca50d2d9",
+                  "title": "Macrobiopsie du sein",
+                  "score": 0.6214659810731409
+                },
+                {
+                  "id": "7503738f-44f4-453f-9808-02eafec0903a",
+                  "title": "Macrobiopsie du sein",
+                  "score": 0.6214659810731409
+                }
+              ]
+            },
+            {
+              "query": "kidney stones",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "7df2686c-4f65-4670-9b39-1f51b850e6f0",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.6571540304217888
+                },
+                {
+                  "id": "d31a8e6e-55ff-4a3b-aebd-be54e4991f96",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.6571540304217888
+                },
+                {
+                  "id": "1078cd80-45ff-43f4-b2fe-1b551837ef35",
+                  "title": "Cas cliniques d'imagerie de l'appareil génital et urinaire masculin",
+                  "score": 0.4869540806554494
+                }
+              ]
+            },
+            {
+              "query": "stroke",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "c0871bc4-c398-446b-b6de-5aa9bbe4e047",
+                  "title": "Séance de cas cliniques : Accident Vasculaire Cérébral de l'enfant",
+                  "score": 0.6824123194731896
+                },
+                {
+                  "id": "6f36e5d0-7720-4394-a124-ebbb1dae3a9d",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.5895436782619904
+                },
+                {
+                  "id": "601c0dad-6400-4cab-9670-fe52bec4b4d4",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.5895436782619904
+                }
+              ]
+            },
+            {
+              "query": "MRI multiple sclerosis",
+              "rank": 2,
+              "top": [
+                {
+                  "id": "4b1f91cc-4d07-441b-9e40-f677d504c404",
+                  "title": "Atelier multimodalité d'imagerie du système nerveux central - Imagerie des pathologies de la substance blanche",
+                  "score": 0.6476851275622075
+                },
+                {
+                  "id": "db348eb7-0276-46e8-bace-e72f2f1cbd81",
+                  "title": "Imagerie de la sclérose en plaques en 2026 : fondamentaux, évolutions et perspectives",
+                  "score": 0.6362075106448744
+                },
+                {
+                  "id": "4924d35b-509e-4f16-bfd5-2eb20655becc",
+                  "title": "Symposium : Peut-on se passer de produit de contraste en neuro-imagerie IRM ?",
+                  "score": 0.5947939999712071
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "search-medical-holdout",
+          "metrics": {
+            "top1": 22,
+            "top3": 27,
+            "total": 30
+          },
+          "ranks": {
+            "urolithiasis": 1,
+            "renal calculi": 1,
+            "lithiase rénale": 1,
+            "urinary stone detection": 1,
+            "ischemic stroke emergency": 1,
+            "accident ischémique cérébral": 2,
+            "bowel obstruction": 10,
+            "occlusion intestinale": 9,
+            "acute pancreatitis": 1,
+            "pancréatite aiguë": 1,
+            "hepatic metastases": 3,
+            "secondary tumors in the liver": 4,
+            "métastases du foie": 3,
+            "adrenal incidentaloma": 1,
+            "incidental adrenal mass": 2,
+            "masse surrénalienne fortuite": 2,
+            "deep vein thrombosis Doppler": 1,
+            "thrombose veineuse écho doppler": 1,
+            "lymphoma imaging": 1,
+            "imagerie du lymphome": 1,
+            "thyroid fine needle aspiration": 1,
+            "cytoponction thyroïdienne": 1,
+            "pediatric appendicitis ultrasound": 1,
+            "échographie appendicite pédiatrique": 1,
+            "prostate artery embolization": 1,
+            "embolisation prostatique": 1,
+            "cervical pain management": 1,
+            "traitement des cervicalgies": 1,
+            "treated breast after cancer": 1,
+            "follow-up imaging after breast cancer treatment": 1
+          },
+          "examples": []
+        }
+      ]
+    },
+    {
+      "model": "onnx-community/embeddinggemma-300m-ONNX",
+      "revision": "5090578d9565bb06545b4552f76e6bc2c93e4a66",
+      "dtype": "q4",
+      "pooling": "sentence_embedding",
+      "suites": [
+        {
+          "name": "search-queries",
+          "metrics": {
+            "top1": 20,
+            "top3": 24,
+            "total": 24
+          },
+          "ranks": {
+            "cancer du sein": 1,
+            "accident vasculaire cérébral": 2,
+            "dépistage des tumeurs mammaires": 1,
+            "calculs dans les reins": 3,
+            "allergie après injection de contraste": 1,
+            "douleur abdominale chez un enfant appendicite": 1,
+            "traiter une tumeur hépatique par ablation": 1,
+            "intelligence artificielle pour biopsie prostatique": 1,
+            "scanner à comptage de photons": 1,
+            "douleurs pelviennes endométriose IRM": 1,
+            "échographie du tendon achilléen": 1,
+            "embolie pulmonaire diagnostic pièges": 1,
+            "kystes du pancréas inquiétants": 1,
+            "IRM pour sclérose en plaques": 1,
+            "diminuer exposition aux rayons patients": 3,
+            "épuisement professionnel burn out": 1,
+            "céphalées faut il injecter": 1,
+            "échographie au début de la grossesse": 1,
+            "échographie des veines des jambes": 1,
+            "imagerie maladie Alzheimer": 1,
+            "ponction de la thyroïde": 1,
+            "hypertension de la veine porte": 1,
+            "infection pulmonaire aspergillus": 1,
+            "douleur testiculaire en urgence": 3
+          },
+          "examples": []
+        },
+        {
+          "name": "search-holdout",
+          "metrics": {
+            "top1": 12,
+            "top3": 12,
+            "total": 12
+          },
+          "ranks": {
+            "imagerie du genou par ultrasons": 1,
+            "cancer pulmonaire dépistage": 1,
+            "prendre en charge un bébé secoué": 1,
+            "imagerie des infections respiratoires": 1,
+            "anatomie radiologique du coude": 1,
+            "traitement des nodules thyroïdiens bénins": 1,
+            "apprendre la mammographie": 1,
+            "embolisation des hématomes sous duraux": 1,
+            "responsabilité juridique du radiologue": 1,
+            "IRM du cœur avancée": 1,
+            "échographie du fœtus et IRM prénatale": 1,
+            "traitement focal du cancer prostatique": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-bilingual",
+          "metrics": {
+            "top1": 20,
+            "top3": 22,
+            "total": 22
+          },
+          "ranks": {
+            "breast": 3,
+            "breast imaging": 1,
+            "breast cancer": 1,
+            "breast screening": 1,
+            "lung cancer": 1,
+            "kidney stones": 1,
+            "stroke": 1,
+            "MRI multiple sclerosis": 1,
+            "pulmonary embolism": 1,
+            "thyroid nodules": 1,
+            "knee ultrasound": 1,
+            "liver ablation": 1,
+            "detecting cancer in dense breasts": 1,
+            "newborn brain injury": 3,
+            "uterine endometriosis MRI": 1,
+            "pancreatic cysts": 1,
+            "Alzheimer disease imaging": 1,
+            "Achilles tendon sonography": 1,
+            "early pregnancy ultrasound": 1,
+            "radiologist burnout": 1,
+            "cardiac magnetic resonance": 1,
+            "prostate targeted biopsy artificial intelligence": 1
+          },
+          "examples": [
+            {
+              "query": "breast",
+              "rank": 3,
+              "top": [
+                {
+                  "id": "196ce053-2d57-4420-a28b-fc14af2f9eea",
+                  "title": "Muscle Grand pectoral",
+                  "score": 0.4377117595384264
+                },
+                {
+                  "id": "73ca4097-adcd-4b53-b0ff-c14fcebdf77b",
+                  "title": "Muscle Grand pectoral",
+                  "score": 0.4377117595384264
+                },
+                {
+                  "id": "56c8b33c-1ab9-4579-9079-0517ca50d2d9",
+                  "title": "Macrobiopsie du sein",
+                  "score": 0.39996782304568057
+                }
+              ]
+            },
+            {
+              "query": "kidney stones",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "7df2686c-4f65-4670-9b39-1f51b850e6f0",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.3693104221680843
+                },
+                {
+                  "id": "d31a8e6e-55ff-4a3b-aebd-be54e4991f96",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.3693104221680843
+                },
+                {
+                  "id": "70f1c1f5-1913-45ec-afde-ca29ffd6f983",
+                  "title": "Your JFR : Advances in uro-imaging",
+                  "score": 0.2851259118505783
+                }
+              ]
+            },
+            {
+              "query": "stroke",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "773077d7-5c68-4a19-a361-a2c31a3692ef",
+                  "title": "Thrombectomie mecanique pour l'AVC en 2026 : indications, filières et formation",
+                  "score": 0.2606780850600939
+                },
+                {
+                  "id": "d64823c8-6144-4810-bf90-fe9e7e47fdee",
+                  "title": "Mieux comprendre les démences vasculaires",
+                  "score": 0.24424694316952172
+                },
+                {
+                  "id": "c0871bc4-c398-446b-b6de-5aa9bbe4e047",
+                  "title": "Séance de cas cliniques : Accident Vasculaire Cérébral de l'enfant",
+                  "score": 0.22643897234604005
+                }
+              ]
+            },
+            {
+              "query": "MRI multiple sclerosis",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "db348eb7-0276-46e8-bace-e72f2f1cbd81",
+                  "title": "Imagerie de la sclérose en plaques en 2026 : fondamentaux, évolutions et perspectives",
+                  "score": 0.4011920287292178
+                },
+                {
+                  "id": "6f36e5d0-7720-4394-a124-ebbb1dae3a9d",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.36124001820461643
+                },
+                {
+                  "id": "601c0dad-6400-4cab-9670-fe52bec4b4d4",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.36124001820461643
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "search-medical-holdout",
+          "metrics": {
+            "top1": 23,
+            "top3": 28,
+            "total": 30
+          },
+          "ranks": {
+            "urolithiasis": 2,
+            "renal calculi": 1,
+            "lithiase rénale": 1,
+            "urinary stone detection": 1,
+            "ischemic stroke emergency": 2,
+            "accident ischémique cérébral": 1,
+            "bowel obstruction": 2,
+            "occlusion intestinale": 1,
+            "acute pancreatitis": 1,
+            "pancréatite aiguë": 1,
+            "hepatic metastases": 1,
+            "secondary tumors in the liver": 2,
+            "métastases du foie": 1,
+            "adrenal incidentaloma": 1,
+            "incidental adrenal mass": 1,
+            "masse surrénalienne fortuite": 1,
+            "deep vein thrombosis Doppler": 1,
+            "thrombose veineuse écho doppler": 1,
+            "lymphoma imaging": 1,
+            "imagerie du lymphome": 1,
+            "thyroid fine needle aspiration": 5,
+            "cytoponction thyroïdienne": 1,
+            "pediatric appendicitis ultrasound": 1,
+            "échographie appendicite pédiatrique": 1,
+            "prostate artery embolization": 1,
+            "embolisation prostatique": 1,
+            "cervical pain management": 6,
+            "traitement des cervicalgies": 3,
+            "treated breast after cancer": 1,
+            "follow-up imaging after breast cancer treatment": 1
+          },
+          "examples": []
+        }
+      ]
+    },
+    {
+      "model": "onnx-community/embeddinggemma-300m-ONNX",
+      "revision": "5090578d9565bb06545b4552f76e6bc2c93e4a66",
+      "dtype": "q8",
+      "pooling": "sentence_embedding",
+      "suites": [
+        {
+          "name": "search-queries",
+          "metrics": {
+            "top1": 22,
+            "top3": 24,
+            "total": 24
+          },
+          "ranks": {
+            "cancer du sein": 1,
+            "accident vasculaire cérébral": 1,
+            "dépistage des tumeurs mammaires": 1,
+            "calculs dans les reins": 3,
+            "allergie après injection de contraste": 1,
+            "douleur abdominale chez un enfant appendicite": 1,
+            "traiter une tumeur hépatique par ablation": 1,
+            "intelligence artificielle pour biopsie prostatique": 1,
+            "scanner à comptage de photons": 1,
+            "douleurs pelviennes endométriose IRM": 1,
+            "échographie du tendon achilléen": 1,
+            "embolie pulmonaire diagnostic pièges": 1,
+            "kystes du pancréas inquiétants": 1,
+            "IRM pour sclérose en plaques": 1,
+            "diminuer exposition aux rayons patients": 2,
+            "épuisement professionnel burn out": 1,
+            "céphalées faut il injecter": 1,
+            "échographie au début de la grossesse": 1,
+            "échographie des veines des jambes": 1,
+            "imagerie maladie Alzheimer": 1,
+            "ponction de la thyroïde": 1,
+            "hypertension de la veine porte": 1,
+            "infection pulmonaire aspergillus": 1,
+            "douleur testiculaire en urgence": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-holdout",
+          "metrics": {
+            "top1": 12,
+            "top3": 12,
+            "total": 12
+          },
+          "ranks": {
+            "imagerie du genou par ultrasons": 1,
+            "cancer pulmonaire dépistage": 1,
+            "prendre en charge un bébé secoué": 1,
+            "imagerie des infections respiratoires": 1,
+            "anatomie radiologique du coude": 1,
+            "traitement des nodules thyroïdiens bénins": 1,
+            "apprendre la mammographie": 1,
+            "embolisation des hématomes sous duraux": 1,
+            "responsabilité juridique du radiologue": 1,
+            "IRM du cœur avancée": 1,
+            "échographie du fœtus et IRM prénatale": 1,
+            "traitement focal du cancer prostatique": 1
+          },
+          "examples": []
+        },
+        {
+          "name": "search-bilingual",
+          "metrics": {
+            "top1": 20,
+            "top3": 22,
+            "total": 22
+          },
+          "ranks": {
+            "breast": 3,
+            "breast imaging": 1,
+            "breast cancer": 1,
+            "breast screening": 1,
+            "lung cancer": 1,
+            "kidney stones": 1,
+            "stroke": 1,
+            "MRI multiple sclerosis": 1,
+            "pulmonary embolism": 1,
+            "thyroid nodules": 1,
+            "knee ultrasound": 1,
+            "liver ablation": 1,
+            "detecting cancer in dense breasts": 1,
+            "newborn brain injury": 3,
+            "uterine endometriosis MRI": 1,
+            "pancreatic cysts": 1,
+            "Alzheimer disease imaging": 1,
+            "Achilles tendon sonography": 1,
+            "early pregnancy ultrasound": 1,
+            "radiologist burnout": 1,
+            "cardiac magnetic resonance": 1,
+            "prostate targeted biopsy artificial intelligence": 1
+          },
+          "examples": [
+            {
+              "query": "breast",
+              "rank": 3,
+              "top": [
+                {
+                  "id": "196ce053-2d57-4420-a28b-fc14af2f9eea",
+                  "title": "Muscle Grand pectoral",
+                  "score": 0.4465917531450983
+                },
+                {
+                  "id": "73ca4097-adcd-4b53-b0ff-c14fcebdf77b",
+                  "title": "Muscle Grand pectoral",
+                  "score": 0.4465917531450983
+                },
+                {
+                  "id": "56c8b33c-1ab9-4579-9079-0517ca50d2d9",
+                  "title": "Macrobiopsie du sein",
+                  "score": 0.40105859842264885
+                }
+              ]
+            },
+            {
+              "query": "kidney stones",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "7df2686c-4f65-4670-9b39-1f51b850e6f0",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.37136168328798336
+                },
+                {
+                  "id": "d31a8e6e-55ff-4a3b-aebd-be54e4991f96",
+                  "title": "Détection des calculs urinaires",
+                  "score": 0.37136168328798336
+                },
+                {
+                  "id": "70f1c1f5-1913-45ec-afde-ca29ffd6f983",
+                  "title": "Your JFR : Advances in uro-imaging",
+                  "score": 0.26946765178061216
+                }
+              ]
+            },
+            {
+              "query": "stroke",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "773077d7-5c68-4a19-a361-a2c31a3692ef",
+                  "title": "Thrombectomie mecanique pour l'AVC en 2026 : indications, filières et formation",
+                  "score": 0.2556925128695111
+                },
+                {
+                  "id": "c0871bc4-c398-446b-b6de-5aa9bbe4e047",
+                  "title": "Séance de cas cliniques : Accident Vasculaire Cérébral de l'enfant",
+                  "score": 0.21559265987118303
+                },
+                {
+                  "id": "d64823c8-6144-4810-bf90-fe9e7e47fdee",
+                  "title": "Mieux comprendre les démences vasculaires",
+                  "score": 0.20117297883384902
+                }
+              ]
+            },
+            {
+              "query": "MRI multiple sclerosis",
+              "rank": 1,
+              "top": [
+                {
+                  "id": "db348eb7-0276-46e8-bace-e72f2f1cbd81",
+                  "title": "Imagerie de la sclérose en plaques en 2026 : fondamentaux, évolutions et perspectives",
+                  "score": 0.4103684552483533
+                },
+                {
+                  "id": "4b1f91cc-4d07-441b-9e40-f677d504c404",
+                  "title": "Atelier multimodalité d'imagerie du système nerveux central - Imagerie des pathologies de la substance blanche",
+                  "score": 0.3621799527170905
+                },
+                {
+                  "id": "6f36e5d0-7720-4394-a124-ebbb1dae3a9d",
+                  "title": "Cas cliniques en imagerie neurologique",
+                  "score": 0.3510477826986361
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "search-medical-holdout",
+          "metrics": {
+            "top1": 26,
+            "top3": 29,
+            "total": 30
+          },
+          "ranks": {
+            "urolithiasis": 1,
+            "renal calculi": 1,
+            "lithiase rénale": 1,
+            "urinary stone detection": 1,
+            "ischemic stroke emergency": 1,
+            "accident ischémique cérébral": 1,
+            "bowel obstruction": 2,
+            "occlusion intestinale": 1,
+            "acute pancreatitis": 1,
+            "pancréatite aiguë": 1,
+            "hepatic metastases": 1,
+            "secondary tumors in the liver": 2,
+            "métastases du foie": 1,
+            "adrenal incidentaloma": 1,
+            "incidental adrenal mass": 1,
+            "masse surrénalienne fortuite": 1,
+            "deep vein thrombosis Doppler": 1,
+            "thrombose veineuse écho doppler": 1,
+            "lymphoma imaging": 1,
+            "imagerie du lymphome": 1,
+            "thyroid fine needle aspiration": 5,
+            "cytoponction thyroïdienne": 1,
+            "pediatric appendicitis ultrasound": 1,
+            "échographie appendicite pédiatrique": 1,
+            "prostate artery embolization": 1,
+            "embolisation prostatique": 1,
+            "cervical pain management": 3,
+            "traitement des cervicalgies": 1,
+            "treated breast after cancer": 1,
+            "follow-up imaging after breast cancer treatment": 1
+          },
+          "examples": []
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "model": "onnx-community/embeddinggemma-300m-ONNX",
+    "metrics": {
+      "top1": 9,
+      "top3": 10,
+      "total": 12,
+      "mrr": 0.8208333333333333
+    },
+    "results": [
+      {
+        "query": "renal colic",
+        "rank": 1,
+        "ms": 286,
+        "top": [
+          {
+            "title": "Détection des calculs urinaires",
+            "score": 0.292
+          },
+          {
+            "title": "Détection des calculs urinaires",
+            "score": 0.292
+          },
+          {
+            "title": "Animation Junior - Débuter en échographie rénale",
+            "score": 0.274
+          }
+        ]
+      },
+      {
+        "query": "colique néphrétique",
+        "rank": 1,
+        "ms": 150,
+        "top": [
+          {
+            "title": "Détection des calculs urinaires",
+            "score": 0.346
+          },
+          {
+            "title": "Détection des calculs urinaires",
+            "score": 0.346
+          },
+          {
+            "title": "Imagerie pédiatrique - Cystosonographie en pratique: indications et technique",
+            "score": 0.274
+          }
+        ]
+      },
+      {
+        "query": "urinary calculi",
+        "rank": 1,
+        "ms": 134,
+        "top": [
+          {
+            "title": "Détection des calculs urinaires",
+            "score": 0.462
+          },
+          {
+            "title": "Détection des calculs urinaires",
+            "score": 0.462
+          },
+          {
+            "title": "Your JFR : Advances in uro-imaging",
+            "score": 0.366
+          }
+        ]
+      },
+      {
+        "query": "blood clot in the lung",
+        "rank": 1,
+        "ms": 146,
+        "top": [
+          {
+            "title": "Atelier multimodalité d'imagerie thoracique - Les pièges dans l’embolie pulmonaire",
+            "score": 0.321
+          },
+          {
+            "title": "Thrombectomie des artères pulmonaires",
+            "score": 0.307
+          },
+          {
+            "title": "Radiologie interventionnelle dans l'hypertension pulmonaire post embolique",
+            "score": 0.281
+          }
+        ]
+      },
+      {
+        "query": "incidental suprarenal lesion",
+        "rank": 1,
+        "ms": 134,
+        "top": [
+          {
+            "title": "Incidentalomes surrénaliens : quels patients adresser à un centre de référence du réseau ENDOCAN-COMETE ?",
+            "score": 0.404
+          },
+          {
+            "title": "Hypertension portale et encéphalopathie hépatique: place la radiologie interventionnelle",
+            "score": 0.28
+          }
+        ]
+      },
+      {
+        "query": "liver secondaries",
+        "rank": 10,
+        "ms": 142,
+        "top": [
+          {
+            "title": "Atelier multimodalité d'imagerie digestive - Tumeurs solides hépatiques",
+            "score": 0.312
+          },
+          {
+            "title": "Animation Junior - Débuter en échographie abdominale ( coupes de base pour le foie)",
+            "score": 0.299
+          },
+          {
+            "title": "Animation Junior - Débuter en échographie abdominale ( coupes de base pour le foie)",
+            "score": 0.299
+          }
+        ]
+      },
+      {
+        "query": "blocked intestine",
+        "rank": 2,
+        "ms": 127,
+        "top": [
+          {
+            "title": "Abdominal emergencies: A focus on the imaging findings that alter patient management",
+            "score": 0.289
+          },
+          {
+            "title": "Atelier multimodalité des urgences abdominales et pelviennes - Imagerie du syndrome occlusif",
+            "score": 0.261
+          },
+          {
+            "title": "Cas cliniques en imagerie digestive",
+            "score": 0.25
+          }
+        ]
+      },
+      {
+        "query": "prostatic artery embolisation",
+        "rank": 1,
+        "ms": 122,
+        "top": [
+          {
+            "title": "Embolisation de la prostate",
+            "score": 0.572
+          },
+          {
+            "title": "Embolisation de la prostate",
+            "score": 0.572
+          }
+        ]
+      },
+      {
+        "query": "multiple sclerosis follow-up MRI",
+        "rank": 1,
+        "ms": 134,
+        "top": [
+          {
+            "title": "Imagerie de la sclérose en plaques en 2026 : fondamentaux, évolutions et perspectives",
+            "score": 0.398
+          },
+          {
+            "title": "Your JFR : Musculoskeletal oncology imaging: from quantitative MRI to reporting systems",
+            "score": 0.324
+          },
+          {
+            "title": "Atelier multimodalité d'imagerie du système nerveux central - Imagerie des pathologies de la substance blanche",
+            "score": 0.32
+          }
+        ]
+      },
+      {
+        "query": "screening for mammary carcinoma",
+        "rank": 1,
+        "ms": 127,
+        "top": [
+          {
+            "title": "Macrobiopsie du sein",
+            "score": 0.377
+          },
+          {
+            "title": "Macrobiopsie du sein",
+            "score": 0.377
+          },
+          {
+            "title": "Imagerie de la femme - Le sein traité après cancer : repères pratiques et pièges en imagerie mammaire",
+            "score": 0.348
+          }
+        ]
+      },
+      {
+        "query": "fetal magnetic resonance imaging",
+        "rank": 1,
+        "ms": 128,
+        "top": [
+          {
+            "title": "IRM fœtale: les bases pour se lancer",
+            "score": 0.413
+          },
+          {
+            "title": "Séance de cas cliniques en imagerie prénatale",
+            "score": 0.377
+          },
+          {
+            "title": "IRM pédiatrique: sans ou avec injection de produit de contraste ?",
+            "score": 0.33
+          }
+        ]
+      },
+      {
+        "query": "thyroid nodule needle sampling",
+        "rank": 4,
+        "ms": 138,
+        "top": [
+          {
+            "title": "Radiologie interventionnelle des nodules thyroïdiens bénins",
+            "score": 0.41
+          },
+          {
+            "title": "Atelier de simulation en échographie thyroïdienne",
+            "score": 0.355
+          },
+          {
+            "title": "Atelier de simulation en échographie thyroïdienne",
+            "score": 0.355
+          }
+        ]
+      }
+    ]
+  }
+}

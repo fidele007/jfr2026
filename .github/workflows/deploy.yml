@@ -32,6 +32,8 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build site
+        env:
+          VITE_SEARCH_API_URL: ${{ vars.VITE_SEARCH_API_URL }}
         run: bun run build
 
       - name: Configure Pages

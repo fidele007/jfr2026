@@ -64,29 +64,40 @@ switch the source back to **Deploy from a branch** to use local publishing.
 
 ## Semantic search
 
-Search automatically combines keyword matches with semantic matches for non-empty
-queries. Keyword results appear first; the browser worker updates them after
-embedding the query. Date/video filters and alphabetical sorting still apply.
-If model loading fails, keyword search remains available.
+Keyword search runs locally and appears immediately. When `VITE_SEARCH_API_URL`
+is configured at build time, the browser sends non-empty queries to a separate
+search API and merges its ID/score results. Date/video filters and alphabetical
+sorting still apply. Missing configuration, API failures, catalogue mismatches
+and eight-second timeouts leave keyword search available.
 
-The quantized multilingual E5-small retrieval model runs locally in a Web Worker
-using Transformers.js. Its first use downloads approximately 118 MB of model
-weights from Hugging Face, plus the tokenizer and WASM runtime. The browser caches
-model files for subsequent searches. Queries are processed locally, without an
-API key. This improves relevance; it does not reduce the model download size.
+Visitors download no model, inference runtime or search index. The optional
+CPU service runs EmbeddingGemma 300M q8 using Transformers.js in Node.js. Its first
+start downloads approximately 309 MB of weights plus tokenizer files; a persistent
+Docker volume keeps those files across restarts. Search queries are sent to this
+service, whose application does not log their text. Deployment instructions and
+an optional Caddy example for the home lab are in [server/README.md](server/README.md).
 
 Titles and session descriptions have separate embeddings (75% title, 25%
-description). E5 uses `query: ` and `passage: ` prefixes. A small word-match bonus
+description). Queries use `task: search result | query: `; documents use
+`title: none | text: `. The ONNX graph returns the trained `sentence_embedding`,
+including pooling and dense projection. Pooling raw hidden states would skip
+that projection and produce incompatible embeddings. A small word-match bonus
 uses corpus word frequencies to distinguish close semantic candidates, with
 accent/plural normalization. Similarity and relative-score cutoffs remove weak
-matches. Exact keyword matches, including speakers, remain first. The model
+matches. Model embeddings of broad medical and unrelated topics also allow
+abstention when an unrelated topic clearly wins (margin 0.05), rejecting cooking,
+travel and repair queries without raising the cutoff above short medical queries.
+These topic anchors are not query translations or a medical synonym dictionary.
+Exact keyword matches, including speakers, remain first. The model
 revision is pinned in the generated index so index and query embeddings agree.
-Semantic-only cards show « Très pertinent » for hybrid scores of at least 0.92,
+Semantic-only cards show « Très pertinent » for hybrid scores of at least 0.55,
 and « Sujet proche » otherwise. This conservative display threshold is a
 heuristic for the current model, not calibrated confidence. The numeric ranking
 score remains available in a tooltip on hover or keyboard focus.
-Rapid typing replaces queued queries, and the worker caches the last 20 query
-vectors so changing filters does not require another inference.
+Rapid typing aborts superseded browser requests; stale responses are ignored.
+The API serializes inference, bounds pending work, shares duplicate requests,
+and caches 256 query results. Catalogue SHA-256 hashes prevent mixing results
+from an outdated server index with a newer programme in the browser.
 
 After changing `static/json/event.json`, regenerate and verify the committed index:
 
@@ -97,43 +108,72 @@ bun test tests/semantic.test.ts
 ```
 
 Index generation uses Node.js and caches its model under `.cache/transformers/`.
-The same quantized model and mean pooling are used for indexing and queries.
+Index version 3 pins the model revision, q8 precision, prompts and sentence
+embedding output, and includes domain anchor vectors. Indexing and server
+inference use the same representation. `data/search/index.json` is private to
+the service build and is not copied into the static website.
 To inspect individual query rankings:
 
 ```sh
 node scripts/evaluate-search.mjs
 ```
 
-On the 24 hand-authored French development queries in `tests/search-queries.json`,
-compared with the MiniLM index in commit `92a74ba`, semantic-stage top-one hits
-improved from 10/24 to 19/24, and top-three hits from
-14/24 to 21/24. A separate 12-query set in `tests/search-holdout.json`, evaluated
-after tuning, had 12/12 top-one hits. These are title-pattern relevance checks,
-not independent clinical judgments or a guarantee for arbitrary queries. The
-regression test also checks index integrity and rejects three unrelated queries.
+To compare embedding models independently of lexical bonuses and acceptance
+thresholds, generate candidate indices in `.cache/` and run:
 
-Known weak queries remain: paraphrases about radiation exposure, leg veins, and
-testicular pain. Further tuning should use new examples and user feedback rather
-than loosening the relevance checks for those cases.
+```sh
+node scripts/compare-search-models.mjs data/search/index.json .cache/candidate-index.json
+```
 
-### Browser embedding runtime
+This writes per-query ranks, top results, and CPU inference timings to
+`.cache/search-model-benchmark.json`. Candidate index generation accepts model,
+revision, and output path as positional arguments to `build-search-index.mjs`.
 
-The worker imports only the BERT encoder, tokenizer, and pooling utilities through
-`src/lib/embedding-runtime.mjs`. The generic Transformers.js entry initializes
-unused model registries; a Mistral registry entry in the minified worker triggered
-GitHub push protection during branch deployment. The smaller entry removes that
-unused registry rather than bypassing push protection.
+The raw embedding comparison in `tests/search-embedding-benchmark.json` uses the
+same 75/25 blend and no lexical bonus, translation rules, or acceptance cutoff:
 
-Transformers.js is pinned to 4.3.1 because this entry uses its internal source
-paths. Vite supplies browser-only stubs for the source modules' Node imports.
-After upgrading the library, verify the paths, rebuild, run the parity check,
-and smoke-test the production worker in a browser:
+| Relevant result in top three | MPNet q8 | EmbeddingGemma q8 |
+| --- | ---: | ---: |
+| French development queries | 20/24 | 24/24 |
+| French secondary queries | 11/12 | 12/12 |
+| English-to-French queries | 20/22 | 22/22 |
+| Medical terminology selection set | 17/30 | 29/30 |
+
+Other candidates include E5-base/large, BGE-M3, Qwen3 Embedding 0.6B,
+BioLORD-2023-M (locally exported with float export parity), and EmbeddingGemma q4.
+Gemma q8 has the best overall results on these selection sets. The final hybrid
+search also has 24/24, 12/12, 22/22 and 29/30 top-three hits, and rejects 12
+unrelated queries. `kidney stones`, `renal calculi`, `renal colic`, `colique
+néphrétique` and `stroke` retrieve relevant French sessions without translation.
+
+A fresh 12-query validation set, written after model selection, has 10/12
+top-three hits. Known weaknesses are `liver secondaries` and thyroid needle
+sampling phrases; broad `breast` ranks pectoral anatomy above breast sessions.
+These are hand-authored title-pattern checks, not independent clinical judgments
+or guarantees for arbitrary queries. Models were selected using the first four
+sets, so they are no longer unseen holdouts. The real HTTP API is also checked
+against all 100 relevance queries, retaining those metrics. Browser checks cover
+the API integration, keyword-only mode, server failure, rapid replacement, and
+absence of model/index downloads. No candidate weights or export dependencies
+are committed.
+
+### Website configuration and checks
+
+Copy `.env.example` to `.env` and set `VITE_SEARCH_API_URL` to the public HTTPS
+endpoint, including `/search`, then rebuild. For the Pages workflow, use the
+repository variable of the same name. Leave it empty until the API is deployed.
+The URL is public and does not contain a secret.
+
+The browser has no inference imports, worker, or model fallback. The service
+uses the public Transformers.js API, pinned to 4.3.1; no internal package imports
+or browser-specific ONNX stubs are needed.
 
 ```sh
 bun run build
-node scripts/test-embedding-runtime.mjs
+node scripts/test-client-build.mjs
+node --test tests/search-service.test.mjs
 ```
 
-The parity check compares embeddings against the public feature-extraction
-pipeline and checks that the unused Mistral model registry is absent from the
-production bundle.
+The build check rejects model, WASM or search-index artifacts in the published
+website. Service tests cover request validation, CORS, readiness, queue bounds,
+deduplication, cache reuse, rate limiting, and catalogue version mismatch.

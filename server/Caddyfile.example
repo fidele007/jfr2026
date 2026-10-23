@@ -1,0 +1,5 @@
+# Use this only if you choose Caddy for your existing server.
+# Point this hostname's DNS to the server and make ports 80/443 reachable first.
+api.forcefidele.com {
+    reverse_proxy 127.0.0.1:3080
+}

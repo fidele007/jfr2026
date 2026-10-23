@@ -11,7 +11,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"deploy": "bun run build && node scripts/deploy.mjs",
-		"search:index": "node scripts/build-search-index.mjs"
+		"search:index": "node scripts/build-search-index.mjs",
+		"search:serve": "node server/start.mjs"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.1.1",

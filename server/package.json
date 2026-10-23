@@ -1,0 +1,6 @@
+{
+  "name": "jfr2026-search-service",
+  "private": true,
+  "type": "module",
+  "dependencies": { "@huggingface/transformers": "4.3.1" }
+}

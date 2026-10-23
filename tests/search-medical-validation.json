@@ -1,0 +1,14 @@
+[
+  {"query":"renal colic", "relevant":"Maladie lithiasique|calculs urinaires"},
+  {"query":"colique néphrétique", "relevant":"Maladie lithiasique|calculs urinaires"},
+  {"query":"urinary calculi", "relevant":"Maladie lithiasique|calculs urinaires"},
+  {"query":"blood clot in the lung", "relevant":"embolie pulmonaire|artères pulmonaires"},
+  {"query":"incidental suprarenal lesion", "relevant":"Incidentalomes surrénaliens"},
+  {"query":"liver secondaries", "relevant":"Métastases hépatiques"},
+  {"query":"blocked intestine", "relevant":"syndrome occlusif"},
+  {"query":"prostatic artery embolisation", "relevant":"Embolisation de la prostate"},
+  {"query":"multiple sclerosis follow-up MRI", "relevant":"sclérose en plaques"},
+  {"query":"screening for mammary carcinoma", "relevant":"sein|mammaire|mammographie"},
+  {"query":"fetal magnetic resonance imaging", "relevant":"IRM fœtale|prénatale"},
+  {"query":"thyroid nodule needle sampling", "relevant":"Cytoponction Cervicale"}
+]

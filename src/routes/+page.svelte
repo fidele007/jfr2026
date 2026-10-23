@@ -8,55 +8,51 @@
 	import MediaHistoryButton from '$lib/MediaHistoryButton.svelte';
 	import SessionCard from '$lib/SessionCard.svelte';
 	import { rankSessions } from '$lib/semantic';
-	import SemanticWorker from '$lib/semantic.worker?worker';
+	import { fetchSearchScores } from '$lib/search-client';
 
+	const searchEndpoint = import.meta.env.VITE_SEARCH_API_URL?.trim() || '';
 	let semanticStatus = '';
 	let semanticMatches = new Map<string, number>();
 	let semanticPending = false;
-	let semanticWorker: Worker | undefined;
+	let semanticRequest: AbortController | undefined;
+	let catalogueHash = '';
 	let searchVersion = 0;
-	let latestSearch: { id: number; value: string } | undefined;
-
-	const applySemanticSearch = (value: string, id: number) => {
+	const applySemanticSearch = async (value: string, id: number) => {
+		if (!searchEndpoint || !catalogueHash) return;
+		semanticRequest?.abort();
+		const request = new AbortController();
+		semanticRequest = request;
+		const deadline = setTimeout(() => request.abort(), 8000);
 		semanticPending = true;
 		semanticStatus = 'Recherche par sens…';
-		if (!semanticWorker) {
-			semanticWorker = new SemanticWorker();
-			semanticWorker.onmessage = ({ data }) => {
-				if (data.id !== searchVersion || !latestSearch) return;
-				semanticPending = false;
-				if (data.error) {
-					semanticStatus = 'Mots-clés uniquement';
-					return;
-				}
-				const scoped = sessionsByDate[selectedDate] ?? sessionsByDate[''];
-				semanticMatches = new Map<string, number>(
-					data.scores.filter(([id]: [string, number]) => {
-						const session = scoped.find((item: any) => item.id === id);
-						return session && !eventContainString(session, latestSearch!.value);
-					})
+		try {
+			const scores = await fetchSearchScores(searchEndpoint, value, catalogueHash, request.signal);
+			if (id !== searchVersion) return;
+			const scoped = sessionsByDate[selectedDate] ?? sessionsByDate[''];
+			semanticMatches = new Map<string, number>(
+				scores.filter(([id]: [string, number]) => {
+					const session = scoped.find((item: any) => item.id === id);
+					return session && !eventContainString(session, value);
+				})
+			);
+			filteredSessions = rankSessions(
+				scoped.filter((x: any) => !onlyVideos || x.picture),
+				new Map(scores),
+				(x: any) => eventContainString(x, value)
+			);
+			if (sortAlphabetically)
+				filteredSessions = filteredSessions.toSorted((a: any, b: any) =>
+					a.title.localeCompare(b.title)
 				);
-				filteredSessions = rankSessions(
-					scoped.filter((x: any) => !onlyVideos || x.picture),
-					new Map(data.scores),
-					(x: any) => eventContainString(x, latestSearch!.value)
-				);
-				if (sortAlphabetically)
-					filteredSessions = filteredSessions.toSorted((a: any, b: any) =>
-						a.title.localeCompare(b.title)
-					);
-				displaySessions = filteredSessions.slice(0, FETCH_LIMIT);
-				semanticStatus = 'Mots-clés et sujets proches';
-			};
-			semanticWorker.onerror = () => {
-				semanticPending = false;
-				semanticStatus = 'Mots-clés uniquement';
-				semanticWorker?.terminate();
-				semanticWorker = undefined;
-			};
+			displaySessions = filteredSessions.slice(0, FETCH_LIMIT);
+			semanticStatus = 'Mots-clés et sujets proches';
+		} catch {
+			if (id === searchVersion) semanticStatus = 'Mots-clés uniquement';
+		} finally {
+			clearTimeout(deadline);
+			if (id === searchVersion) semanticPending = false;
+			if (semanticRequest === request) semanticRequest = undefined;
 		}
-		latestSearch = { id, value };
-		semanticWorker.postMessage({ id, query: value, indexUrl: `${base}/search/index.json` });
 	};
 
 	let searchInput: HTMLInputElement;
@@ -103,6 +99,7 @@
 
 	const searchSessions = async (value: string) => {
 		const version = ++searchVersion;
+		semanticRequest?.abort();
 		value = value.trim();
 		semanticStatus = '';
 		semanticMatches = new Map();
@@ -129,7 +126,7 @@
 		displaySessions = filteredSessions.slice(0, FETCH_LIMIT);
 
 		loading = false;
-		if (value) applySemanticSearch(value, version);
+		if (value) void applySemanticSearch(value, version);
 
 		$filterOptions = {
 			filterKeyword: searchInput.value,
@@ -141,6 +138,7 @@
 
 	const onSearch = async () => {
 		searchVersion++;
+		semanticRequest?.abort();
 		semanticStatus = '';
 		semanticMatches = new Map();
 		semanticPending = false;
@@ -213,7 +211,12 @@
 		selectedDate = $filterOptions.selectedDate;
 
 		const response = await fetch(`${base}/json/event.json`);
-		eventJson = await response.json();
+		const bytes = await response.arrayBuffer();
+		eventJson = JSON.parse(new TextDecoder().decode(bytes));
+		if (searchEndpoint && globalThis.crypto?.subtle) {
+			const digest = await crypto.subtle.digest('SHA-256', bytes);
+			catalogueHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+		}
 
 		const allRealItems = eventJson.data.event.search.items.filter(
 			(x: any) => !x.title.startsWith('Session test')
@@ -251,7 +254,8 @@
 
 	onDestroy(() => {
 		clearTimeout(timeout);
-		semanticWorker?.terminate();
+		searchVersion++;
+		semanticRequest?.abort();
 		if (typeof document !== 'undefined') {
 			document.removeEventListener('scroll', onScroll);
 		}

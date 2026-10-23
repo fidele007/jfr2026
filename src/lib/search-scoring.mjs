@@ -24,14 +24,21 @@ export function cosineSimilarity(vector, query) {
 }
 
 /**
- * E5 cosine scores are concentrated near 0.7–1.0. Gate on raw similarity,
+ * EmbeddingGemma scores have a wider range than E5. Gate on raw similarity,
  * then use rare query words to separate close semantic candidates.
- * @param {{ ids: string[], vectors: number[][], titleVectors: number[][] }} index
+ * @param {{ ids: string[], vectors: number[][], titleVectors: number[][], domainAnchors?: { medical: number[][], unrelated: number[][] } }} index
  * @param {ArrayLike<number>} queryVector
  * @param {ReturnType<typeof createLexicalIndex>} lexical
  * @param {string} query
  */
 export function scoreSessions(index, queryVector, lexical, query) {
+  if (index.domainAnchors) {
+    const medical = Math.max(...index.domainAnchors.medical.map(vector => cosineSimilarity(vector, queryVector)));
+    const unrelated = Math.max(...index.domainAnchors.unrelated.map(vector => cosineSimilarity(vector, queryVector)));
+    // Abstain only when an unrelated topic clearly wins. Medical short queries
+    // can have low absolute cosine scores, so a high global cutoff loses recall.
+    if (unrelated > medical + .05) return [];
+  }
   const terms = searchTerms(query);
   const weights = terms.map(term => Math.log(1 + index.ids.length / (1 + (lexical.frequencies.get(term) ?? 0))));
   const totalWeight = weights.reduce((a,b) => a+b, 0);
@@ -42,7 +49,7 @@ export function scoreSessions(index, queryVector, lexical, query) {
     return { id, semantic, score: semantic + .05 * coverage };
   });
   const best = Math.max(...results.map(result => result.semantic));
-  return results.filter(result => result.semantic >= Math.max(.80, best - .065) && result.score >= .85)
+  return results.filter(result => result.semantic >= Math.max(.20, best - .12) && result.score >= .22)
     .sort((a,b) => b.score - a.score);
 }
 

@@ -1,5 +1,5 @@
 import { createLexicalIndex, scoreSessions } from '../src/lib/search-scoring.mjs';
-import { pipeline, env } from '@huggingface/transformers';
+import { loadSearchExtractor } from './search-extractor.mjs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 
@@ -10,7 +10,7 @@ export async function evaluateSearch(index, cases, extractor) {
   const results = [];
   for (const entry of cases) {
     const start = performance.now();
-    const out = await extractor((index.queryPrefix || '') + entry.query, { pooling: 'mean', normalize: true, truncation: true });
+    const out = await extractor((index.queryPrefix || '') + entry.query, { pooling: index.pooling || 'mean', normalize: true, truncation: true });
     const cosine = vector => vector.reduce((sum, value, i) => sum + value * out.data[i], 0) / Math.hypot(...vector);
     const ranked = lexical ? scoreSessions(index, out.data, lexical, entry.query) : index.vectors.map((vector, i) => ({ id: index.ids[i], score: cosine(vector) })).sort((a,b) => b.score-a.score);
     const regex = new RegExp(entry.relevant, 'i');
@@ -23,10 +23,9 @@ export async function evaluateSearch(index, cases, extractor) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const index = JSON.parse(await readFile(process.argv[2] || 'static/search/index.json', 'utf8'));
+  const index = JSON.parse(await readFile(process.argv[2] || 'data/search/index.json', 'utf8'));
   const cases = JSON.parse(await readFile(process.argv[4] || 'tests/search-queries.json', 'utf8'));
-  env.cacheDir = '.cache/transformers';
-  const extractor = await pipeline('feature-extraction', index.model, { revision: index.revision ?? 'main', dtype: 'q8' });
+  const extractor = await loadSearchExtractor(index);
   const report = await evaluateSearch(index, cases, extractor);
   console.log(report.metrics);
   await writeFile(process.argv[3] || '.cache/search-evaluation.json', JSON.stringify(report, null, 2));

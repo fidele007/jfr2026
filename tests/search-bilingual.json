@@ -1,0 +1,90 @@
+[
+  {
+    "query": "breast",
+    "relevant": "sein|mammaire|sénolog"
+  },
+  {
+    "query": "breast imaging",
+    "relevant": "sein|mammaire|sénolog|imagerie de la femme"
+  },
+  {
+    "query": "breast cancer",
+    "relevant": "sein|mammaire|sénolog"
+  },
+  {
+    "query": "breast screening",
+    "relevant": "sein|mammaire|sénolog"
+  },
+  {
+    "query": "lung cancer",
+    "relevant": "cancer du poumon|cancer bronchique|cancers bronchopulmonaires"
+  },
+  {
+    "query": "kidney stones",
+    "relevant": "calculs urinaires|lithiasique"
+  },
+  {
+    "query": "stroke",
+    "relevant": "Accident Vasculaire|AVC|Urgences ischémiques"
+  },
+  {
+    "query": "MRI multiple sclerosis",
+    "relevant": "sclérose en plaques"
+  },
+  {
+    "query": "pulmonary embolism",
+    "relevant": "embolie pulmonaire"
+  },
+  {
+    "query": "thyroid nodules",
+    "relevant": "nodules thyroïdiens"
+  },
+  {
+    "query": "knee ultrasound",
+    "relevant": "genou"
+  },
+  {
+    "query": "liver ablation",
+    "relevant": "Ablation.*foie|Ablation hépatique|ablations percutanées"
+  },
+  {
+    "query": "detecting cancer in dense breasts",
+    "relevant": "sein|mammaire|s.nolog|mammographie"
+  },
+  {
+    "query": "newborn brain injury",
+    "relevant": "nouveau.n.|n.onatal|p.rinatal|B.b. secou."
+  },
+  {
+    "query": "uterine endometriosis MRI",
+    "relevant": "endom.triose"
+  },
+  {
+    "query": "pancreatic cysts",
+    "relevant": "kystiques du pancr.as"
+  },
+  {
+    "query": "Alzheimer disease imaging",
+    "relevant": "Alzheimer"
+  },
+  {
+    "query": "Achilles tendon sonography",
+    "relevant": "achille"
+  },
+  {
+    "query": "early pregnancy ultrasound",
+    "relevant": "grossesse d.butante"
+  },
+  {
+    "query": "radiologist burnout",
+    "relevant": "Epuisement professionnel"
+  },
+  {
+    "query": "cardiac magnetic resonance",
+    "relevant": "IRM cardiaque"
+  },
+  {
+    "query": "prostate targeted biopsy artificial intelligence",
+    "relevant": "IA.*biopsies.*prostate"
+  }
+]
