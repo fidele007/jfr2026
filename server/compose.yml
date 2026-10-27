@@ -1,5 +1,6 @@
 services:
   search:
+    pull_policy: build
     build:
       context: ..
       dockerfile: server/Dockerfile

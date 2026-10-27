@@ -10,15 +10,22 @@ the application does not log their text.
 
 ## Run on Ubuntu
 
-From the repository root, with Docker Engine and the Compose plugin installed:
+With Docker Engine and the Compose plugin installed, run from the repository's
+`server/` folder. For first-time setup:
 
 ```sh
-cp server/env.example server/.env
+cd server
+cp env.example .env
 # Edit SEARCH_ALLOWED_ORIGINS to the exact website origin (no URL path).
-docker compose --env-file server/.env -f server/compose.yml up -d --build
-docker compose --env-file server/.env -f server/compose.yml logs -f search
+docker compose up -d
+docker compose logs -f search
 curl http://127.0.0.1:3080/healthz
 ```
+
+Compose reads `server/.env` automatically. Keep your existing `.env` when
+updating. The `pull_policy: build` setting rebuilds the image on `up`, reusing
+Docker's build cache and including the current committed search index. The build
+context is the repository root; no ZIP or extracted deployment folder is needed.
 
 The first start downloads approximately 309 MB of weights, plus tokenizer files.
 `/healthz` returns 503 during loading and 200 when inference is ready. Restarts reuse
@@ -29,7 +36,7 @@ measurements from the ASUS. The service uses CPU inference and needs no NVIDIA s
 Benchmark the actual host, including uncached, cached and concurrent queries:
 
 ```sh
-docker compose --env-file server/.env -f server/compose.yml exec search \
+docker compose exec search \
   node scripts/benchmark-search-api.mjs http://127.0.0.1:3000
 docker stats --no-stream
 ```
@@ -47,7 +54,7 @@ After the local service works and routing is confirmed, on Ubuntu:
 
 ```sh
 # Check this filename is unused before copying/enabling the separate site.
-sudo cp -n server/nginx.conf.example /etc/nginx/sites-available/jfr-search
+sudo cp -n nginx.conf.example /etc/nginx/sites-available/jfr-search
 sudo ln -s /etc/nginx/sites-available/jfr-search /etc/nginx/sites-enabled/jfr-search
 sudo nginx -t && sudo systemctl reload nginx
 curl -H 'Host: api.forcefidele.com' http://127.0.0.1/healthz
@@ -101,10 +108,26 @@ ignores stale responses, and falls back after failures or an eight-second timeou
 
 ## Update and verify
 
+For routine deployment, pull the latest source from the repository root, then
+start the service from `server/`:
+
+```sh
+git pull --ff-only
+cd server
+docker compose up -d
+docker compose logs -f search
+```
+
+Wait for `Search ready` in the logs, then check `/healthz`. Keep the existing
+`server/.env` and `model-cache` volume. If moving from an extracted bundle, copy
+its `server/.env` into this checkout's `server/` folder before starting Compose.
+
 After changing the programme or session detail files in `static/json/`, regenerate `data/search/index.json` with
 `bun run search:index`, rebuild the API image and deploy the website from the same
 catalogue revision. The private index is copied into the service image, never the
 static site. Keep the `model-cache` volume when updating.
+
+Run source verification from the repository root:
 
 ```sh
 node --test tests/search-service.test.mjs
