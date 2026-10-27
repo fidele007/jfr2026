@@ -2,6 +2,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { loadSearchExtractor, searchModelProfile } from './search-extractor.mjs';
 import { medicalTopics, unrelatedTopics } from '../src/lib/search-domain.mjs';
+import { loadSearchDocuments } from './search-documents.mjs';
 
 const model = process.argv[2] || 'onnx-community/embeddinggemma-300m-ONNX';
 const revision = process.argv[3] || '5090578d9565bb06545b4552f76e6bc2c93e4a66';
@@ -13,12 +14,9 @@ const items = JSON.parse(source).data.event.search.items.filter(x => !x.title.st
 const extractor = await loadSearchExtractor(profile);
 const vectors = [];
 const titleVectors = [];
-const documents = [];
-for (const [i, item] of items.entries()) {
-  const clean = text => text.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
-  const title = clean(item.title);
-  const text = clean([item.title, ...item.objectives, ...item.topics.map(t => t.value)].join('. '));
-  documents.push({ title, body: text });
+const documents = await loadSearchDocuments(items);
+for (let i = 0; i < items.length; i++) {
+  const { title, body: text } = documents[i];
   for (const [input, target] of [[title, titleVectors], [text, vectors]]) {
     const output = await extractor(passagePrefix + input, { pooling, normalize: true, truncation: true });
     target.push(Array.from(output.data, x => Math.round(x * 127)));

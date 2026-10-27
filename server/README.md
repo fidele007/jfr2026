@@ -101,7 +101,7 @@ ignores stale responses, and falls back after failures or an eight-second timeou
 
 ## Update and verify
 
-After changing the programme, regenerate `data/search/index.json` with
+After changing the programme or session detail files in `static/json/`, regenerate `data/search/index.json` with
 `bun run search:index`, rebuild the API image and deploy the website from the same
 catalogue revision. The private index is copied into the service image, never the
 static site. Keep the `model-cache` volume when updating.

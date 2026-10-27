@@ -77,8 +77,11 @@ Docker volume keeps those files across restarts. Search queries are sent to this
 service, whose application does not log their text. Deployment instructions and
 an optional Caddy example for the home lab are in [server/README.md](server/README.md).
 
-Titles and session descriptions have separate embeddings (75% title, 25%
-description). Queries use `task: search result | query: `; documents use
+Titles and session text have separate embeddings (75% title, 25%
+session text). Session text includes the title, session type, every scheduled item
+title (with or without video), speakers' first/last names, countries and cities,
+objectives and topic labels. Speaker details come from both the session and its
+scheduled items, with duplicates removed. Queries use `task: search result | query: `; documents use
 `title: none | text: `. The ONNX graph returns the trained `sentence_embedding`,
 including pooling and dense projection. Pooling raw hidden states would skip
 that projection and produce incompatible embeddings. A small word-match bonus
@@ -99,11 +102,13 @@ The API serializes inference, bounds pending work, shares duplicate requests,
 and caches 256 query results. Catalogue SHA-256 hashes prevent mixing results
 from an outdated server index with a newer programme in the browser.
 
-After changing `static/json/event.json`, regenerate and verify the committed index:
+After changing `static/json/event.json` or any session detail file in
+`static/json/`, regenerate and verify the committed index:
 
 ```sh
 bun run search:index
 node scripts/test-search.mjs
+node --test tests/search-documents.test.mjs
 bun test tests/semantic.test.ts
 ```
 

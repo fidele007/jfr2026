@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { evaluateSearch } from './evaluate-search.mjs';
 import { scoreSessions, createLexicalIndex } from '../src/lib/search-scoring.mjs';
+import { loadSearchDocuments } from './search-documents.mjs';
 
 const source = readFileSync('static/json/event.json');
 const items = JSON.parse(source).data.event.search.items.filter(item => !item.title.startsWith('Session test'));
@@ -19,6 +20,7 @@ assert.match(index.revision, /^[a-f0-9]{40}$/);
 assert.deepEqual(index.ids, items.map(item => item.id));
 assert.equal(new Set(index.ids).size, items.length);
 assert.equal(index.documents.length, items.length);
+assert.deepEqual(index.documents, await loadSearchDocuments(items), 'Rebuild the index after catalogue or session detail changes');
 for (const vectors of [index.vectors, index.titleVectors]) {
   assert.equal(vectors.length, items.length);
   assert(vectors.every(vector => vector.length === 768 && vector.some(x => x !== 0) && vector.every(value => Number.isInteger(value) && Math.abs(value) <= 127)));
