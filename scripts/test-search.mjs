@@ -26,6 +26,13 @@ for (const vectors of [index.vectors, index.titleVectors]) {
   assert(vectors.every(vector => vector.length === 768 && vector.some(x => x !== 0) && vector.every(value => Number.isInteger(value) && Math.abs(value) <= 127)));
 }
 const extractor = await loadSearchExtractor(index);
+for (const query of ['LITT en oncologie', 'Florian Nabet France Paris']) {
+  const output = await extractor(index.queryPrefix + query);
+  const results = scoreSessions(index, output.data, createLexicalIndex(index.documents), query);
+  const expected = query.startsWith('LITT') ? 'e4211361-24fd-427a-a804-45b6ac1d6df5' : '0f119eb4-1bd3-43a3-b7be-c0c222b04a7e';
+  assert(results.slice(0, 3).some(result => result.id === expected), `Session detail query should rank in the top three: ${query}`);
+  if (query.startsWith('LITT')) assert.equal(results[0].id, expected, 'Literal video title query should rank first');
+}
 const cases = JSON.parse(readFileSync('tests/search-queries.json'));
 const report = await evaluateSearch(index, cases, extractor);
 assert(report.metrics.top1 >= 21, 'Primary query set: top-one relevance regressed');

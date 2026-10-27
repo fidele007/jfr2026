@@ -91,7 +91,10 @@ matches. Model embeddings of broad medical and unrelated topics also allow
 abstention when an unrelated topic clearly wins (margin 0.05), rejecting cooking,
 travel and repair queries without raising the cutoff above short medical queries.
 These topic anchors are not query translations or a medical synonym dictionary.
-Exact keyword matches, including speakers, remain first. The model
+Exact keyword matches, including speakers, remain first. Ranking
+also retains and promotes query phrase matches in indexed text, with accent,
+plural and French stop-word normalization, so scheduled titles and speaker locations remain discoverable
+even with weak title similarity. The model
 revision is pinned in the generated index so index and query embeddings agree.
 Semantic-only cards show « Très pertinent » for hybrid scores of at least 0.55,
 and « Sujet proche » otherwise. This conservative display threshold is a
