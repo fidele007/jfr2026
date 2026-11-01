@@ -169,8 +169,19 @@ are committed.
 
 Copy `.env.example` to `.env` and set `VITE_SEARCH_API_URL` to the public HTTPS
 endpoint, including `/search`, then rebuild. For the Pages workflow, use the
-repository variable of the same name. Leave it empty until the API is deployed.
-The URL is public and does not contain a secret.
+repository variable of the same name. If unset, the endpoint defaults to
+`https://api.forcefidele.com/search`; an explicitly empty value disables semantic
+search. The URL is public and does not contain a secret.
+
+Keyword search also includes scheduled/video titles, speaker names, objectives,
+and available descriptions from the session details. A plain-text keyword file
+is generated automatically by `bun run dev` and `bun run build`, so the browser
+does not need to download all session detail files or embedding vectors.
+
+`bun run deploy` refreshes the semantic index incrementally, builds the website,
+and verifies the live API's catalogue hash before publishing. If the check reports
+an outdated API, commit the new index and rebuild the service on the ASUS first;
+see [the service deployment instructions](server/README.md#update-and-verify).
 
 The browser has no inference imports, worker, or model fallback. The service
 uses the public Transformers.js API, pinned to 4.3.1; no internal package imports

@@ -4,13 +4,13 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
+		"dev": "node scripts/build-keyword-index.mjs && vite dev",
+		"build": "node scripts/build-keyword-index.mjs && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"deploy": "bun run build && node scripts/deploy.mjs",
+		"deploy": "bun run search:index && bun run build && node scripts/deploy.mjs",
 		"search:index": "node scripts/build-search-index.mjs",
 		"search:serve": "node server/start.mjs"
 	},

@@ -1,5 +1,6 @@
 import './gh-pages-rm.mjs';
 import ghPages from 'gh-pages';
+import './check-search-api.mjs';
 
 ghPages.publish('build', { nojekyll: true }, (error) => {
 	if (error) {

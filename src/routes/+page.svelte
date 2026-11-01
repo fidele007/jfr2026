@@ -9,8 +9,10 @@
 	import SessionCard from '$lib/SessionCard.svelte';
 	import { rankSessions } from '$lib/semantic';
 	import { fetchSearchScores } from '$lib/search-client';
+	import searchConfig from '$lib/search-config.json';
+	import { matchesKeywordText, normalizeKeywordText } from '$lib/keyword-search';
 
-	const searchEndpoint = import.meta.env.VITE_SEARCH_API_URL?.trim() || '';
+	const searchEndpoint = (import.meta.env.VITE_SEARCH_API_URL ?? searchConfig.endpoint).trim();
 	let semanticStatus = '';
 	let semanticMatches = new Map<string, number>();
 	let semanticPending = false;
@@ -88,13 +90,11 @@
 	};
 
 	const eventContainString = (event: any, value: string) => {
-		const normalizedSearchTerm = normalizeString(value).toUpperCase();
-		return (
-			event.normalizedTitle.includes(normalizedSearchTerm) ||
-			event.normalizedObjective.includes(normalizedSearchTerm) ||
-			event.normalizedOrganizers.includes(normalizedSearchTerm) ||
-			event.normalizedMembers.includes(normalizedSearchTerm)
-		);
+		return matchesKeywordText([
+			event.normalizedTitle, event.normalizedObjective,
+			event.normalizedOrganizers, event.normalizedMembers,
+			event.normalizedDetail ?? ''
+		], value);
 	};
 
 	const searchSessions = async (value: string) => {
@@ -213,9 +213,19 @@
 		const response = await fetch(`${base}/json/event.json`);
 		const bytes = await response.arrayBuffer();
 		eventJson = JSON.parse(new TextDecoder().decode(bytes));
-		if (searchEndpoint && globalThis.crypto?.subtle) {
+		if (globalThis.crypto?.subtle) {
 			const digest = await crypto.subtle.digest('SHA-256', bytes);
 			catalogueHash = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
+		}
+		let keywordDetails: Record<string, string> = {};
+		try {
+			const keywordsResponse = await fetch(`${base}/search/keywords.json`, { signal: AbortSignal.timeout(8000) });
+			if (!keywordsResponse.ok) throw new Error('Keyword details unavailable');
+			const keywords = await keywordsResponse.json();
+			// Ignore a stale file from a previous deployment rather than mix catalogues.
+			if ((!catalogueHash || keywords.catalogueHash === catalogueHash) && keywords.sessions) keywordDetails = keywords.sessions;
+		} catch (error) {
+			console.warn('Detailed keyword search unavailable', error);
 		}
 
 		const allRealItems = eventJson.data.event.search.items.filter(
@@ -224,6 +234,7 @@
 
 		sessionsByDate[''] = allRealItems;
 		allRealItems.forEach((item: any) => {
+			item.normalizedDetail = normalizeKeywordText(keywordDetails[item.id] ?? '');
 			const startDate = item.start?.includes('T') ? item.start.split('T')[0] : 'undated';
 			if (!sessionsByDate[startDate]) {
 				sessionsByDate[startDate] = [];

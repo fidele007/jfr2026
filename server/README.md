@@ -102,7 +102,8 @@ VITE_SEARCH_API_URL=https://api.forcefidele.com/search
 
 For local builds, put this in the root `.env` and rebuild. For GitHub Pages Actions,
 set the repository variable `VITE_SEARCH_API_URL`, then run the deployment workflow.
-This is a public URL, not a secret. Leave it empty to disable semantic requests.
+This is a public URL, not a secret. An unset variable defaults to the public API
+in `src/lib/search-config.json`; set it explicitly empty to disable semantic requests.
 The browser shows keyword results immediately, cancels superseded requests,
 ignores stale responses, and falls back after failures or an eight-second timeout.
 
@@ -126,6 +127,22 @@ After changing the programme or session detail files in `static/json/`, regenera
 `bun run search:index`, rebuild the API image and deploy the website from the same
 catalogue revision. The private index is copied into the service image, never the
 static site. Keep the `model-cache` volume when updating.
+
+`bun run deploy` refreshes the semantic index incrementally, regenerates the compact
+keyword file, builds the site, and checks the public API's catalogue hash before
+publishing. When the catalogue changes, commit the regenerated index, pull it on
+the ASUS, and run the Compose build before publishing the website:
+
+```sh
+git pull --ff-only
+docker compose --env-file server/.env -f server/compose.yml up -d --build search
+curl http://127.0.0.1:3080/healthz
+```
+
+Keyword search includes scheduled/video titles, speaker identities, objectives,
+and available descriptions. `static/search/keywords.json` is generated from the
+session details during `bun run dev` and `bun run build`; it contains plain text
+only, with no model weights or vectors.
 
 Run source verification from the repository root:
 

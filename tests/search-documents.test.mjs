@@ -25,3 +25,16 @@ test('handles absent schedules, speakers and locations without adding missing-va
     speakers: { items: [{ firstName: 'Jane', lastName: 'Doe', country: null, city: null }] }
   }).body, 'Session. Cours. Jane Doe');
 });
+
+test('includes session and media descriptions, objectives and organizer identities as plain text', () => {
+  const document = sessionSearchDocument({ title: 'Session', organizers: [{ name: 'Société savante' }], outerRoles: [{ members: { items: [{ firstName: 'Anne', lastName: 'Durand' }] } }] }, {
+    description: '<p>Prise en charge &amp; suivi</p>', objectives: ['Objectif commun'],
+    schedule: { items: [{ title: 'Intervention', objectives: ['Objectif commun'], vod: { media: { title: 'Film pratique', description: 'Détail clinique' } } }] }
+  });
+  assert(document.body.includes('Prise en charge & suivi'));
+  assert(document.body.includes('Film pratique'));
+  assert(document.body.includes('Détail clinique'));
+  assert(document.body.includes('Société savante'));
+  assert(document.body.includes('Anne Durand'));
+  assert.equal(document.body.match(/Objectif commun/g).length, 1);
+});

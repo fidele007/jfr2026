@@ -33,8 +33,13 @@ jobs:
 
       - name: Build site
         env:
-          VITE_SEARCH_API_URL: ${{ vars.VITE_SEARCH_API_URL }}
+          VITE_SEARCH_API_URL: ${{ vars.VITE_SEARCH_API_URL || 'https://api.forcefidele.com/search' }}
         run: bun run build
+
+      - name: Verify search API catalogue
+        env:
+          VITE_SEARCH_API_URL: ${{ vars.VITE_SEARCH_API_URL || 'https://api.forcefidele.com/search' }}
+        run: node scripts/check-search-api.mjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
