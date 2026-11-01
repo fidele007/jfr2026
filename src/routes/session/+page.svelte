@@ -156,7 +156,7 @@
 					youtubeId: getYoutubeId(videoMapping, item.vod.media.element.sources[0].uri),
 					url: item.vod.media.element.sources[1]?.uri,
 					thumbnail: item.vod.media.thumbnail,
-					start: item.start.split('T')[1].split('+')[0],
+					start: item.start?.split('T')[1]?.split('+')[0] ?? item.startTime ?? '',
 					speakers: item.speakers.items
 				});
 			}
@@ -175,7 +175,7 @@
 				youtubeId: getYoutubeId(videoMapping, eventDetail.vod.media.element.sources[0].uri),
 				url: eventDetail.vod.media.element.sources[1]?.uri,
 				thumbnail: eventDetail.vod.media.thumbnail,
-				start: eventDetail.start.split('T')[1].split('+')[0],
+				start: eventDetail.start?.split('T')[1]?.split('+')[0] ?? eventDetail.startTime ?? '',
 				speakers: eventDetail.speakers.items
 			});
 		}
@@ -412,7 +412,7 @@
 				<div class="session-header">
 					<div class="session-type">{eventDetail.sessionType}</div>
 					<h1>{eventDetail.title}</h1>
-					<SessionMeta start={eventDetail.start} end={eventDetail.end} />
+					<SessionMeta start={eventDetail.start ?? eventDetail.startTime} end={eventDetail.end} dateUnknown={!eventDetail.start} />
 				</div>
 				{#if mediaList.length == 0}
 					<p class="no-media-note">Aucune vidéo n'est disponible pour cette session.</p>

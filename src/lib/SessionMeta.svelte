@@ -1,19 +1,24 @@
 <script lang="ts">
 	import { IconCalendar, IconClock } from '@tabler/icons-svelte';
 	import { getFriendlyDate } from './Constants.svelte';
-	export let start: string;
-	export let end: string | undefined = undefined;
-	const time = (value: string) => value?.split('T')[1]?.slice(0, 5) ?? value?.slice(0, 5);
+	export let start: string | null | undefined;
+	export let end: string | null | undefined = undefined;
+	export let dateUnknown = false;
+	const time = (value: string | null | undefined) => value?.split('T')[1]?.slice(0, 5) ?? value?.slice(0, 5);
 </script>
 
 <div class="session-meta">
 	{#if start?.includes('T')}
 		<span><IconCalendar size={16} aria-hidden="true" />{getFriendlyDate(start.split('T')[0])}</span>
+	{:else if dateUnknown}
+		<span><IconCalendar size={16} aria-hidden="true" />N/A</span>
 	{/if}
-	<span
-		><IconClock size={16} aria-hidden="true" />{time(start)}{#if end}
-			– {time(end)}{/if}</span
-	>
+	{#if start || end}
+		<span
+			><IconClock size={16} aria-hidden="true" />{time(start)}{#if end}
+				– {time(end)}{/if}</span
+		>
+	{/if}
 </div>
 
 <style>

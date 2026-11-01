@@ -224,7 +224,7 @@
 
 		sessionsByDate[''] = allRealItems;
 		allRealItems.forEach((item: any) => {
-			const startDate = item.start.split('T')[0];
+			const startDate = item.start?.includes('T') ? item.start.split('T')[0] : 'undated';
 			if (!sessionsByDate[startDate]) {
 				sessionsByDate[startDate] = [];
 			}
@@ -312,7 +312,7 @@
 					on:change={onFilterChange}
 				>
 					{#each Object.keys(sessionsByDate) as date}
-						<option value={date}>{date ? dayLabel(new Date(date)) : 'Tous'}</option>
+						<option value={date}>{date === 'undated' ? 'N/A' : date ? dayLabel(new Date(date)) : 'Tous'}</option>
 					{/each}
 				</select>
 				<IconChevronDown size={16} class="select-chevron" aria-hidden="true" />
@@ -394,7 +394,7 @@
 					class:selected={selectedDate === date}
 					aria-pressed={selectedDate === date}
 					on:click={() => onDateChange(date)}
-					>{date ? getFriendlyDate(date) : 'Tous les jours'}</button
+					>{date === 'undated' ? 'N/A' : date ? getFriendlyDate(date) : 'Tous les jours'}</button
 				>
 			{/each}
 		</nav>

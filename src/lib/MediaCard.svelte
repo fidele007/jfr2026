@@ -57,9 +57,9 @@
 	<div class="video-details">
 		{#if media.sessionTitle}<span class="media-session-title">{media.sessionTitle}</span>{/if}
 		<strong class="media-title">{media.title}</strong>
-		{#if showTime || downloadable}
+		{#if (showTime && media.start) || downloadable}
 			<div class="media-meta">
-				{#if showTime}<span class="media-time"
+				{#if showTime && media.start}<span class="media-time"
 						><IconClock size={15} aria-hidden="true" />{media.start?.slice(0, 5)}</span
 					>{/if}
 				{#if downloadable}

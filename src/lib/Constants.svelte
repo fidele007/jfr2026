@@ -1,8 +1,11 @@
 <script context="module" lang="ts">
 	export const normalizeString = (str: string) => str.normalize('NFD').replace(/\p{Diacritic}/gu, '');
 
-	export const getFriendlyDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString('fr-FR', {weekday: 'short', day: '2-digit', month: 'short'});
+	export const getFriendlyDate = (dateString: string | null | undefined) => {
+		if (!dateString) return 'N/A';
+		const date = new Date(dateString);
+		if (Number.isNaN(date.getTime())) return 'N/A';
+		return date.toLocaleDateString('fr-FR', {weekday: 'short', day: '2-digit', month: 'short'});
 	}
 
 	export const getTimeEmoji = (time: string) => {

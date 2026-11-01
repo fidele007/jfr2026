@@ -42,7 +42,7 @@
 		<h2 class="card-title" id="session-title-{info.id}">{info.title}</h2>
 	</div>
 	<div class="card-details">
-		<SessionMeta start={info.start} end={info.end} />
+		<SessionMeta start={info.start ?? info.startTime} end={info.end} dateUnknown={!info.start} />
 		{#if summary}<p class="speaker-summary">
 				<IconUsers size={16} aria-hidden="true" /><span>{summary}</span>
 			</p>{/if}
