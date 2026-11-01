@@ -170,7 +170,7 @@
 		) {
 			mediaList.push({
 				id: eventDetail.vod.media.id,
-				title: eventDetail.vod.media.title ?? '[Sans titre]',
+				title: eventDetail.vod.media.id ? (eventDetail.vod.media.title ?? '[Sans titre]') : `${eventDetail.vod.media.title ?? '[Sans titre]'} Ⓜ️`,
 				hdUrl: eventDetail.vod.media.element.sources[0].uri,
 				youtubeId: getYoutubeId(videoMapping, eventDetail.vod.media.element.sources[0].uri),
 				url: eventDetail.vod.media.element.sources[1]?.uri,
